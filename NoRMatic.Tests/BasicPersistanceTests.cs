@@ -21,7 +21,7 @@ namespace NoRMatic.Tests {
         }
 
         [Test]
-        public void GivenAModelWithABeforeSaveBehavior_Save_ShouldOnlyPersistTheObjectIfTheBehaviorAllows() {
+        public void GivenAModelWithABeforeSaveBehavior_Save_ShouldOnlyPersistTheEntityIfTheBehaviorAllows() {
 
             Patient.DropBehaviors();
 
@@ -36,7 +36,7 @@ namespace NoRMatic.Tests {
         }
 
         [Test]
-        public void GivenAModelWithAQueryBehavior_All_ShouldOnlyReturnObjectsMatchingTheBehaviorExpression() {
+        public void GivenAModelWithAQueryBehavior_All_ShouldOnlyReturnEntitiesMatchingTheBehaviorExpression() {
             
             Patient.DropBehaviors();
 
@@ -54,7 +54,7 @@ namespace NoRMatic.Tests {
         }
 
         [Test]
-        public void GivenAModelWithMultipleQueryBehaviors_All_ShouldOnlyReturnObjectsMatchingTheBehaviorExpressions() {
+        public void GivenAModelWithMultipleQueryBehaviors_All_ShouldOnlyReturnEntitiesMatchingTheBehaviorExpressions() {
             
             Patient.DropBehaviors();
 
@@ -75,7 +75,7 @@ namespace NoRMatic.Tests {
         }
 
         [Test]
-        public void GivenAModelWithAQueryBehavior_Find_ShouldReturnObjectsThatMatchBothWhereAndBehaviorExpressions() {
+        public void GivenAModelWithAQueryBehavior_Find_ShouldReturnEntitiesThatMatchBothWhereAndBehaviorExpressions() {
 
             Patient.DropBehaviors();
 
@@ -124,8 +124,24 @@ namespace NoRMatic.Tests {
 
             var fetched = Patient.GetById(patient.Id);
 
-            Assert.IsNotNull(fetched);
-            Assert.IsTrue(fetched.IsDeleted);
+            fetched.FirstName = "NEWFIRSTNAME";
+            fetched.Save();
+
+            var reFetched = Patient.GetById(patient.Id);
+
+            Assert.AreEqual(reFetched.FirstName, patient.FirstName);
+        }
+
+        [Test]
+        public void GivenAModelWithValidation_Save_ShouldNotPersistTheEntity() {
+
+            Customer.DropBehaviors();
+
+            var customer = new Customer();
+            customer.Save();
+
+            Assert.IsNull(customer.Id);
+            Assert.AreEqual(2, customer.Errors.Count);
         }
     }
 }
