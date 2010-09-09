@@ -1,0 +1,9 @@
+_ReSharper.NoRMatic
+*user
+.suo
+NoRMatic/bin
+NoRMatic/obj
+NoRMatic/*user
+NoRMatic.Tests/bin
+NoRMatic.Tests/obj
+NoRMatic.Tests/*user
