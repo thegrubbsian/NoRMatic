@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Runtime.Serialization.Formatters.Binary;
 using Norm;
 using Norm.Collections;
 
@@ -39,6 +37,10 @@ namespace NoRMatic {
             return query.ToList();
         }
 
+        public IEnumerable<T> GetVersions() {
+            return Find(x => x.IsVersion && x.VersionOfId == Id);
+        }
+
         public static T GetById(ObjectId id) {
             return GetCollection().FindOne(new { Id = id });
         }
@@ -55,9 +57,9 @@ namespace NoRMatic {
             DateUpdated = DateTime.Now;
             GetCollection().Save((T)this);
 
-            Behaviors.AfterSave.ForEach(x => x((T)this));
-
             if (Behaviors.EnableVersioning) SaveVersion();
+
+            Behaviors.AfterSave.ForEach(x => x((T)this));
         }
 
         public void Delete() {
@@ -75,16 +77,6 @@ namespace NoRMatic {
             Behaviors.AfterDelete.ForEach(x => x((T)this));
         }
 
-        public T Clone() {
-            var ms = new MemoryStream();
-            var bf = new BinaryFormatter();
-            bf.Serialize(ms, this);
-            ms.Position = 0;
-            var obj = bf.Deserialize(ms);
-            ms.Close();
-            return (T)obj;
-        }
-
         private List<ValidationResult> Validate() {
             var results = new List<ValidationResult>();
             Validator.TryValidateObject(this, new ValidationContext(this, null, null), results, true);
@@ -99,11 +91,16 @@ namespace NoRMatic {
 
         private void SaveVersion() {
             var clone = Clone();
-            clone.Id = null;
             clone.IsVersion = true;
             clone.DateVersioned = DateTime.Now;
             clone.VersionOfId = Id;
-            clone.Save();
+            GetCollection().Save(clone);
+        }
+
+        private T Clone() {
+            var obj = GetById(Id);
+            obj.Id = null;
+            return obj;
         }
 
         private void DeleteVersions() {

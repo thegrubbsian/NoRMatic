@@ -143,5 +143,26 @@ namespace NoRMatic.Tests {
             Assert.IsNull(customer.Id);
             Assert.AreEqual(2, customer.Errors.Count);
         }
+
+        [Test]
+        public void GivenAModelWithVersioningEnabledButNotSoftDelete_Delete_ShouldDeleteAllVersions() {
+            
+            Patient.DropBehaviors();
+
+            Patient.EnableVersioning();
+
+            var patient = new Patient { FirstName = "Jill", LastName = "Stevens", Age = 29, Gender = "female" };
+            patient.Save();
+
+            patient.Age = 30;
+            patient.Save();
+
+            patient.LastName = "Martin";
+            patient.Save();
+
+            var versions = patient.GetVersions();
+
+            Assert.AreEqual(3, versions.Count());
+        }
     }
 }
