@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="INoRMaticInitializer.cs" />
     <Compile Include="NoRMaticModel.cs" />
     <Compile Include="BehaviorContainer.cs" />
     <Compile Include="NoRMaticConfig.cs" />

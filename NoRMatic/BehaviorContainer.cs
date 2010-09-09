@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace NoRMatic {
 
     internal sealed class BehaviorContainer<T> {
 
-        public static BehaviorContainer<T> Instance {
-            get { return Nested.instance; }
-        }
-
         class Nested {
             static Nested() { } // Constructor so compiler doesn't mark beforefieldinit
             internal static readonly BehaviorContainer<T> instance = new BehaviorContainer<T>();
+        }
+
+        public static BehaviorContainer<T> Instance {
+            get { return Nested.instance; }
         }
 
         public bool EnableVersioning { get; set; }

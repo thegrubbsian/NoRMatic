@@ -164,5 +164,21 @@ namespace NoRMatic.Tests {
 
             Assert.AreEqual(3, versions.Count());
         }
+
+        [Test]
+        public void GivenAModelSetupByNoRMaticInitializer_Save_ShouldRespectBehaviors() {
+
+            NoRMaticConfig.Initialize();
+
+            var subscriber = new Subscriber { FirstName = "Joe", LastName = "Peters" };
+            subscriber.Save();
+
+            subscriber.LastName = "Jones";
+            subscriber.Save();
+
+            var versions = subscriber.GetVersions();
+
+            Assert.AreEqual(2, versions.Count());
+        }
     }
 }

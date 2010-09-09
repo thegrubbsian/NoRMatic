@@ -1,4 +1,6 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
+using System.Linq;
 
 namespace NoRMatic {
 
@@ -6,6 +8,21 @@ namespace NoRMatic {
 
         public static string ConnectionString {
             get { return ConfigurationManager.ConnectionStrings["NoRMaticConnectionString"].ConnectionString; }
+        }
+
+        public static void Initialize() {
+            
+            var types = AppDomain.CurrentDomain.GetAssemblies().ToList()
+                .SelectMany(s => s.GetTypes())
+                .Where(x => typeof(INoRMaticInitializer).IsAssignableFrom(x) && 
+                    x != typeof(INoRMaticInitializer));
+
+            foreach (var type in types) {
+                try {
+                    var initializer = Activator.CreateInstance(type);
+                    ((INoRMaticInitializer) initializer).Initialize();
+                } catch { }
+            }
         }
     }
 }

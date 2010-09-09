@@ -51,7 +51,9 @@
     <Compile Include="BasicPersistanceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestModel\Customer.cs" />
+    <Compile Include="TestModel\NoRMaticSetup.cs" />
     <Compile Include="TestModel\Patient.cs" />
+    <Compile Include="TestModel\Subscriber.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NoRMatic\NoRMatic.csproj">
