@@ -37,7 +37,7 @@ namespace NoRMatic.Tests {
 
         [Test]
         public void GivenAModelWithAQueryBehavior_All_ShouldOnlyReturnEntitiesMatchingTheBehaviorExpression() {
-            
+
             Patient.DropBehaviors();
 
             Patient.AddQueryBehavior(x => x.Age < 20);
@@ -55,7 +55,7 @@ namespace NoRMatic.Tests {
 
         [Test]
         public void GivenAModelWithMultipleQueryBehaviors_All_ShouldOnlyReturnEntitiesMatchingTheBehaviorExpressions() {
-            
+
             Patient.DropBehaviors();
 
             Patient.AddQueryBehavior(x => x.Gender == "female");
@@ -96,7 +96,7 @@ namespace NoRMatic.Tests {
 
         [Test]
         public void GivenAModelWithSoftDeleteEnabled_Delete_DoesNotDeleteTheEntityByMarksItsDeletedProperty() {
-            
+
             Patient.DropBehaviors();
             Patient.EnableSoftDelete();
 
@@ -146,7 +146,7 @@ namespace NoRMatic.Tests {
 
         [Test]
         public void GivenAModelWithVersioningEnabledButNotSoftDelete_Delete_ShouldDeleteAllVersions() {
-            
+
             Patient.DropBehaviors();
 
             Patient.EnableVersioning();
@@ -185,7 +185,7 @@ namespace NoRMatic.Tests {
 
         [Test]
         public void GivenAModelSetupByNoRMaticInitializer_Find_ShouldRespectBehaviors() {
-            
+
             Subscriber.DropBehaviors();
 
             NoRMaticConfig.Initialize();
@@ -205,7 +205,7 @@ namespace NoRMatic.Tests {
 
         [Test]
         public void GivenAModelWithSoftDeleteAndVersioningEnabled_All_ShouldNotReturnAnyDeletedItemsOrVersions() {
-            
+
             Patient.DropBehaviors();
 
             Patient.EnableVersioning();
@@ -286,6 +286,27 @@ namespace NoRMatic.Tests {
 
             Assert.IsTrue(fetched.Any(x => x.IsDeleted));
             Assert.IsTrue(fetched.Any(x => x.IsVersion));
+        }
+
+        [Test]
+        public void GivenAModelWithUserAuditingEnabled_Save_ShouldApplyTheCurrentUserToUpdatedByProperty() {
+
+            MedicalRecord.DropBehaviors();
+
+            NoRMaticConfig.SetCurrentUserProvider(() => "user1");
+            MedicalRecord.EnableUserAuditing();
+
+            var medicalRecord = new MedicalRecord {
+                PatientIdentifier = "12345",
+                FirstName = "Tom",
+                LastName = "Burris",
+                Temperature = 98,
+                Weight = 173
+            };
+
+            medicalRecord.Save();
+
+            Assert.AreEqual(medicalRecord.UpdatedBy, "user1");
         }
     }
 }

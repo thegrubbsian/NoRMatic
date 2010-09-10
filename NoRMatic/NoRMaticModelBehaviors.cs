@@ -7,17 +7,24 @@ namespace NoRMatic {
     // Partial class to contain all the behavior registration and flagging related members
     public abstract partial class NoRMaticModel<T> where T : NoRMaticModel<T> {
 
-        // Soft Delete Properties
+        // Soft Delete
         public bool IsDeleted { get; internal set; }
         public DateTime DateDeleted { get; internal set; }
 
-        // Versioning Properties
+        // Versioning
         public bool IsVersion { get; internal set; }
         public DateTime DateVersioned { get; internal set; }
         public ObjectId VersionOfId { get; internal set; }
 
+        // User Auditing
+        public string UpdatedBy { get; internal set; }
+
         private static BehaviorContainer<T> Behaviors {
             get { return BehaviorContainer<T>.Instance; }
+        }
+
+        private static ConfigContainer Config {
+            get { return ConfigContainer.Instance; }
         }
 
         /// <summary>
@@ -84,12 +91,25 @@ namespace NoRMatic {
             Behaviors.EnableVersioning = true;
         }
 
+        /// <summary>
+        /// Enables user auditing behavior which cuases all Save actions to set the UpdatedBy property based on the given CurrentUserProvider
+        /// function.  If CurrentUserProvider is not supplied, then an empty string will be used for the value.  If used in conjunction with
+        /// EnableVersioning, each version will also be marked with the user who created the version with the VersionMadeBy property.
+        /// </summary>
+        public static void EnableUserAuditing() {
+            Behaviors.EnableUserAuditing = true;
+        }
+
         public static void DisableSoftDelete() {
             Behaviors.EnableSoftDelete = false;
         }
 
         public static void DisableVersioning() {
             Behaviors.EnableVersioning = false;
+        }
+
+        public static void DisableUserAuditing() {
+            Behaviors.EnableUserAuditing = false;
         }
     }
 }

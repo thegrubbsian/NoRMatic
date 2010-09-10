@@ -24,5 +24,9 @@ namespace NoRMatic {
                 } catch { }
             }
         }
+
+        public static void SetCurrentUserProvider(Func<string> provider) {
+            ConfigContainer.Instance.CurrentUserProvider = provider;
+        }
     }
 }

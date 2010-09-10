@@ -107,6 +107,10 @@ namespace NoRMatic {
                 if (Behaviors.BeforeSave.Any(x => !x((T)this))) return;
 
             DateUpdated = DateTime.Now;
+
+            if (Behaviors.EnableUserAuditing && Config.CurrentUserProvider != null)
+                UpdatedBy = Config.CurrentUserProvider();
+
             GetMongoCollection().Save((T)this);
 
             if (Behaviors.EnableVersioning) SaveVersion();

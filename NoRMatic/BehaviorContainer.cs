@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace NoRMatic {
@@ -18,6 +17,7 @@ namespace NoRMatic {
 
         public bool EnableVersioning { get; set; }
         public bool EnableSoftDelete { get; set; }
+        public bool EnableUserAuditing { get; set; }
 
         private List<Expression<Func<T, bool>>> _query = new List<Expression<Func<T, bool>>>();
         public List<Expression<Func<T, bool>>> Query {
@@ -57,6 +57,7 @@ namespace NoRMatic {
             _afterDelete.Clear();
             EnableSoftDelete = false;
             EnableVersioning = false;
+            EnableUserAuditing = false;
         }
     }
 }
