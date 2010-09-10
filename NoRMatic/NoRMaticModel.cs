@@ -11,8 +11,8 @@ namespace NoRMatic {
 
     public abstract partial class NoRMaticModel<T> where T : NoRMaticModel<T> {
 
-        public ObjectId Id { get; set; }
-        public DateTime DateUpdated { get; set; }
+        public ObjectId Id { get; internal set; }
+        public DateTime DateUpdated { get; internal set; }
 
         /// <summary>
         /// Returns any validation errors for the current state of the entity.  Validation uses the System.ComponentModel.DataAnnotations
