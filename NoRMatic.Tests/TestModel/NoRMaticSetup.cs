@@ -5,6 +5,7 @@
         public void Initialize() {
             
             Subscriber.EnableVersioning();
+            Subscriber.AddQueryBehavior(x => x.City == "Charlotte");
         }
     }
 }

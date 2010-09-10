@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace NoRMatic.Tests {
 
     [TestFixture]
-    public class BasicPersistanceTests {
+    public class BasicTests {
 
         [Test]
         public void NoRMaticModelSave_ShouldPersistTheObject() {
@@ -168,6 +168,8 @@ namespace NoRMatic.Tests {
         [Test]
         public void GivenAModelSetupByNoRMaticInitializer_Save_ShouldRespectBehaviors() {
 
+            Subscriber.DropBehaviors();
+
             NoRMaticConfig.Initialize();
 
             var subscriber = new Subscriber { FirstName = "Joe", LastName = "Peters" };
@@ -179,6 +181,111 @@ namespace NoRMatic.Tests {
             var versions = subscriber.GetVersions();
 
             Assert.AreEqual(2, versions.Count());
+        }
+
+        [Test]
+        public void GivenAModelSetupByNoRMaticInitializer_Find_ShouldRespectBehaviors() {
+            
+            Subscriber.DropBehaviors();
+
+            NoRMaticConfig.Initialize();
+
+            var subscriberA = new Subscriber { FirstName = "Samantha", LastName = "Jones", City = "New York" };
+            var subscriberB = new Subscriber { FirstName = "Niki", LastName = "Jones", City = "Charlotte" };
+            var subscriberC = new Subscriber { FirstName = "Maria", LastName = "Gilcher", City = "Charlotte" };
+
+            subscriberA.Save();
+            subscriberB.Save();
+            subscriberC.Save();
+
+            var fetched = Subscriber.Find(x => x.LastName == "Jones");
+
+            Assert.IsFalse(fetched.Any(x => x.City != "Charlotte"));
+        }
+
+        [Test]
+        public void GivenAModelWithSoftDeleteAndVersioningEnabled_All_ShouldNotReturnAnyDeletedItemsOrVersions() {
+            
+            Patient.DropBehaviors();
+
+            Patient.EnableVersioning();
+            Patient.EnableSoftDelete();
+
+            var patientA = new Patient { FirstName = "Greg", LastName = "Sanderson", Age = 32, Gender = "male" };
+            var patientB = new Patient { FirstName = "Lou", LastName = "Marcus", Age = 22, Gender = "male" };
+            var patientC = new Patient { FirstName = "Sandra", LastName = "O'Connor", Age = 78, Gender = "female" };
+
+            patientA.Save();
+            patientB.Save();
+            patientC.Save();
+
+            patientA.Delete();
+            patientC.Delete();
+
+            patientB.LastName = "Michaels";
+            patientB.Save();
+
+            var fetched = Patient.All();
+
+            Assert.IsTrue(!fetched.Any(x => x.IsDeleted));
+            Assert.IsTrue(!fetched.Any(x => x.IsVersion));
+        }
+
+        [Test]
+        public void GivenAModelWithSoftDeleteAndVersioningEnabled_Find_ByDefaultShouldNotReturnAnyDeletedItemsOrVersions() {
+
+            Patient.DropBehaviors();
+
+            Patient.EnableVersioning();
+            Patient.EnableSoftDelete();
+
+            var patientA = new Patient { FirstName = "Greg", LastName = "Sanderson", Age = 32, Gender = "male" };
+            var patientB = new Patient { FirstName = "Lou", LastName = "Marcus", Age = 22, Gender = "male" };
+            var patientC = new Patient { FirstName = "Sandra", LastName = "O'Connor", Age = 78, Gender = "female" };
+
+            patientA.Save();
+            patientB.Save();
+            patientC.Save();
+
+            patientA.Delete();
+            patientC.Delete();
+
+            patientB.LastName = "Michaels";
+            patientB.Save();
+
+            var fetched = Patient.Find(x => x.Age > 12);
+
+            Assert.IsTrue(!fetched.Any(x => x.IsDeleted));
+            Assert.IsTrue(!fetched.Any(x => x.IsVersion));
+        }
+
+        [Test]
+        public void GivenAModelWithSoftDeleteAndVersioningEnabled_Find_ShouldReturnDeletedItemsAndVersionsWhenOverridden() {
+
+            Patient.DeleteAll();
+            Patient.DropBehaviors();
+
+            Patient.EnableVersioning();
+            Patient.EnableSoftDelete();
+
+            var patientA = new Patient { FirstName = "Greg", LastName = "Sanderson", Age = 32, Gender = "male" };
+            var patientB = new Patient { FirstName = "Lou", LastName = "Marcus", Age = 22, Gender = "male" };
+            var patientC = new Patient { FirstName = "Sandra", LastName = "O'Connor", Age = 78, Gender = "female" };
+
+            patientA.Save();
+            patientB.Save();
+            patientC.Save();
+
+            patientA.Delete();
+            patientC.Delete();
+
+            patientB.LastName = "Michaels";
+            patientB.Save();
+
+            var fetched = Patient.Find(x => x.Age > 12, includeDeleted: true, includeVersions: true);
+
+            Assert.IsTrue(fetched.Any(x => x.IsDeleted));
+            Assert.IsTrue(fetched.Any(x => x.IsVersion));
         }
     }
 }

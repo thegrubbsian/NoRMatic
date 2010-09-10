@@ -12,30 +12,48 @@ namespace NoRMatic {
         public DateTime DateDeleted { get; internal set; }
 
         // Versioning Properties
-        public bool IsVersion { get; private set; }
-        public DateTime DateVersioned { get; set; }
-        public ObjectId VersionOfId { get; set; }
+        public bool IsVersion { get; internal set; }
+        public DateTime DateVersioned { get; internal set; }
+        public ObjectId VersionOfId { get; internal set; }
 
         private static BehaviorContainer<T> Behaviors {
             get { return BehaviorContainer<T>.Instance; }
         }
 
+        /// <summary>
+        /// Extends the Where conditions of any query executed for a given collection.
+        /// </summary>
         public static void AddQueryBehavior(Expression<Func<T, bool>> action) {
             Behaviors.Query.Add(action);
         }
 
+        /// <summary>
+        /// BeforeSaveBehaviors are functions called before any Save for the collection.  If any of these
+        /// functions return 'true' the save will NOT proceed.  This can be useful if there are pre-save validations or other checks
+        /// that need to be made that may stop the save.
+        /// </summary>
         public static void AddBeforeSaveBehavior(Func<T, bool> action) {
             Behaviors.BeforeSave.Add(action);
         }
 
+        /// <summary>
+        /// Actions executed after a save and after a version is created if EnableVersioning is set.
+        /// </summary>
         public static void AddAfterSaveBehavior(Action<T> action) {
             Behaviors.AfterSave.Add(action);
         }
 
+        /// <summary>
+        /// BeforeDeleteBehaviors are functions called before any Delete for the collection.  If any of these
+        /// functions return 'true' the delete will not proceed (including soft deletes).
+        /// </summary>
         public static void AddBeforeDeleteBehavior(Func<T, bool> action) {
             Behaviors.BeforeDelete.Add(action);
         }
 
+        /// <summary>
+        /// Actions executed after a delete.
+        /// </summary>
         public static void AddAfterDeleteBehavior(Action<T> action) {
             Behaviors.AfterDelete.Add(action);
         }
