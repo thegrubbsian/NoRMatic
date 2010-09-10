@@ -28,6 +28,11 @@ Most of what you'll need to use NoRMatic is provided in the NoRMaticModel<T> bas
 * GetById(ObjectId) [T] - Finds a single document by its Id which includes soft deleted items
 * DeleteAll() [void] - Drops the entire collection regardless of EnableSoftDelete
 * GetMongoCollection() [IMongoCollection<T>] - Returns a raw hook to the NoRM collection
+	
+	public class Customer : NoRMaticModel<Customer> { ... }
+	var customer = new Customer { Name = "Bill Smith", Address = "101 Address Way" };
+	customer.Save();
+	customer.Delete();
 
 ## Soft Deletes
 To enable soft delete on a type, use the static method EnableSoftDelete() on any NoRMaticModel<T> type.  For example, the following will enable soft delete for all instances of Customer or Product.
