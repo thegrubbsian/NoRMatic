@@ -50,7 +50,7 @@ namespace NoRMatic {
         /// for this type they will become constraints on this query.  By default, Find() will not return versions or soft deleted
         /// entities, this behavior can be overridden by passing true to the 'includeDeleted' or 'includeVersions' arguments.
         /// </summary>
-        public static IEnumerable<T> Find(Expression<Func<T, bool>> expression,
+        public static IQueryable<T> Find(Expression<Func<T, bool>> expression,
             bool includeDeleted = false, bool includeVersions = false) {
 
             var query = GetMongoCollection().AsQueryable().Where(expression);
@@ -64,14 +64,7 @@ namespace NoRMatic {
             if (Behaviors.EnableVersioning && !includeVersions)
                 query = query.Where(x => !x.IsVersion);
 
-            return query.ToList();
-        }
-
-        /// <summary>
-        /// Returns all previous versions of the entity if the EnableVersioning flag is set for this type.
-        /// </summary>
-        public IEnumerable<T> GetVersions() {
-            return GetMongoCollection().Find(new { IsVersion = true, VersionOfId = Id });
+            return query;
         }
 
         /// <summary>
@@ -138,6 +131,13 @@ namespace NoRMatic {
             }
 
             Behaviors.AfterDelete.ForEach(x => x((T)this));
+        }
+
+        /// <summary>
+        /// Returns all previous versions of the entity if the EnableVersioning flag is set for this type.
+        /// </summary>
+        public IEnumerable<T> GetVersions() {
+            return GetMongoCollection().Find(new { IsVersion = true, VersionOfId = Id });
         }
 
         private List<ValidationResult> Validate() {

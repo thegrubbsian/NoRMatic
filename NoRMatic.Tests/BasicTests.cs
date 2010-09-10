@@ -89,7 +89,7 @@ namespace NoRMatic.Tests {
             patientB.Save();
             patientC.Save();
 
-            var fetched = Patient.Find(x => x.Gender == "female");
+            var fetched = Patient.Find(x => x.Gender == "female").ToList();
 
             Assert.IsTrue(fetched.All(x => x.Age > 25 && x.Gender == "female"));
         }

@@ -19,12 +19,23 @@ Most of what you'll need to use NoRMatic is provided in the NoRMaticModel<T> bas
 * Delete() [void] - Deletes the document or "soft deletes" it if EnableSoftDelete is set
 * GetVersions() [List<T>] - Returns a list of versions for the document if EnableVersioning is set
 
+Additionally, the following static methods will be available:
+
+* All() [IEnumerable<T>] - Returns all documents from the collection excluding versions or soft deleted documents
+* Find(Expression<Func<T, bool>>) [IQueryable<T>] - Finds a document via the NoRM LINQ provider
+* GetById(ObjectId) [T] - Finds a single document by its Id which includes soft deleted items
+* DeleteAll() [void] - Drops the entire collection regardless of EnableSoftDelete
+* GetMongoCollection() [IMongoCollection<T>] - Returns a raw hook to the NoRM collection
+
 ## Soft Deletes
 To enable soft delete on a type, use the static method EnableSoftDelete() on any NoRMaticModel<T> object.  For example, the following will enable soft delete for all instances of Customer or Product.
 	
-<pre><code>Customer.EnableSoftDelete();
-	Product.EnableSoftDelete();
+<pre><code>
+Customer.EnableSoftDelete();
+Product.EnableSoftDelete();
 </code></pre>
+
+When soft delete is enabled, any calls to Delete() will not remove the document from the collection, but will set the documents IsDeleted property to true and the DateDeleted property to the current date.  The document will no longer be updateable, you will be able to access it, but not save any changes to the documents properties.
 
 ## Versioning
 
