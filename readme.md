@@ -68,10 +68,10 @@ The base set of validation attributes doesn't support complex nested types (such
 	public class Order : NoRMaticModel<Order> {
 		
 		[Required]
-		public string CustomerName { get; set;}
+		public string CustomerName { get; set; }
 		
 		[Required, DataType(DataType.EmailAddress)]
-		public string CustomerEmail { get; set;}
+		public string CustomerEmail { get; set; }
 		
 		[ValidateChild]
 		public List<OrderItem> Items { get; set; }		
@@ -80,6 +80,17 @@ The base set of validation attributes doesn't support complex nested types (such
 	var order = new Order { ... };
 	order.Errors // list of any errors based on above validation attributes
 	order.Save(); // would only persist the document if no errors exist
+
+## User Auditing
+User auditing simply means that when a document is saved, the current user is looked up and some value is set for the UpdatedBy property of any NoRMaticModel<T>.  Because the framework doesn't have any concept of the current user, the user must be retrieved.  To facilitate this two things are required to get user auditing setup.
+
+	//Register the current user provider (simply an anonymous function)
+	NoRMaticConfig.SetCurrentUserProvider(() => Session["UserId"]);
+	
+	//EnableUserAuditing for the target type.
+	Subscriber.EnableUserAuditing();
+	
+Each time a Subscriber is saved, the current user provider function will be executed which will return (in this case) the UserId value from Session...you could however source this data from anything which is in scope for the provider function.
 
 ## Behaviors
 Behaviors is a way to add universal functionality to a collection without needing to override any base types as well as to simulate event hooks at certain points in CRUD operations.  There are five types of behaviors that can be added to a type:
@@ -98,8 +109,8 @@ Behaviors are basically just anonymous functions which are executed before or af
 
 In the example below, the Find() expression will be combined with the query behavior expression and will limit results to those documents with an Inventory greater than 0 and a Supplier of "ACME".  Query behaviors can be used to apply universal limiting to queries in multi-tennant or user security situations.
 
-	Product.AddQueryBehavior(x => x.Inventory > 0);
-	var products = Product.Find(x => x.Supplier == "ACME");
+	Product.AddQueryBehavior(x => x.Inventory > 0); // Configuration
+	var products = Product.Find(x => x.Supplier == "ACME"); // Usage
 
 ### BeforeSave Behaviors
 
