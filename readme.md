@@ -6,7 +6,7 @@ Most of what you'll need to use NoRMatic is provided in the NoRMaticModel<T> bas
 
 ### Instance Members
 
-**Properties**
+**Properties
 * Id [ObjectId] - The MongoDB _id property for the document
 * DateUpdated [DateTime] - This is updated each time the document is saved
 * Errors [List<ValidationResult>] - A list of validation results from System.ComponentModel.DataAnnotations
@@ -16,7 +16,7 @@ Most of what you'll need to use NoRMatic is provided in the NoRMaticModel<T> bas
 * DateVersioned [DateTime] - If EnableVersioning is set, this indicates the date the version was created
 * VersionOfId [ObjectId] - If EnableVersioning is set, this is the source document's Id
 
-**Methods**
+**Methods
 * Save() [void] - Persists the document and creates versions if EnableVersioning is set
 * Delete() [void] - Deletes the document or "soft deletes" it if EnableSoftDelete is set
 * GetVersions() [List<T>] - Returns a list of versions for the document if EnableVersioning is set
