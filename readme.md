@@ -22,8 +22,7 @@ Most of what you'll need to use NoRMatic is provided in the NoRMaticModel<T> bas
 ## Soft Deletes
 To enable soft delete on a type, use the static method EnableSoftDelete() on any NoRMaticModel<T> object.  For example, the following will enable soft delete for all instances of Customer or Product.
 	
-<pre><code>
-	Customer.EnableSoftDelete();
+<pre><code>Customer.EnableSoftDelete();
 	Product.EnableSoftDelete();
 </code></pre>
 
