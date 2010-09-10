@@ -19,6 +19,22 @@ Most of what you'll need to use NoRMatic is provided in the NoRMaticModel<T> bas
 * Delete() [void] - Deletes the document or "soft deletes" it if EnableSoftDelete is set
 * GetVersions() [List<T>] - Returns a list of versions for the document if EnableVersioning is set
 
-Additionally, the following static members will be available:
+## Soft Deletes
+To enable soft delete on a type, use the static method EnableSoftDelete() on any NoRMaticModel<T> object.  For example, the following will enable soft delete for all instances of Customer or Product.
+	
+<pre><code>
+	Customer.EnableSoftDelete();
+	Product.EnableSoftDelete();
+</code></pre>
 
-### Properties
+## Versioning
+
+
+## Validation
+
+
+## Behaviors
+Much of what is available
+
+
+## Configuration/Initialization
