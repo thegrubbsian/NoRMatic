@@ -47,6 +47,8 @@ Note.EnableVersioning();
 MedicalRecord.EnableVersioning();
 </code></pre>
 
+When versioning is enabled
+
 ## Validation
 
 
