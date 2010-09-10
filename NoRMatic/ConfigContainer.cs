@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 
 namespace NoRMatic {
 
@@ -13,6 +14,13 @@ namespace NoRMatic {
             get { return Nested.instance; }
         }
 
+        public string ConnectionStringName { get; set; }
         public Func<string> CurrentUserProvider { get; set; }
+
+        private Func<string> _connectionStringProvider = () => ConfigurationManager.ConnectionStrings["NoRMaticConnectionString"].ConnectionString;
+        public Func<string> ConnectionStringProvider {
+            get { return _connectionStringProvider; }
+            set { _connectionStringProvider = value; }
+        }
     }
 }

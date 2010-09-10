@@ -7,7 +7,7 @@ namespace NoRMatic {
     public static class NoRMaticConfig {
 
         public static string ConnectionString {
-            get { return ConfigurationManager.ConnectionStrings["NoRMaticConnectionString"].ConnectionString; }
+            get { return ConfigContainer.Instance.ConnectionStringProvider(); }
         }
 
         public static void Initialize() {
@@ -27,6 +27,10 @@ namespace NoRMatic {
 
         public static void SetCurrentUserProvider(Func<string> provider) {
             ConfigContainer.Instance.CurrentUserProvider = provider;
+        }
+
+        public static void SetConnectionStringProvider(Func<string> provider) {
+            ConfigContainer.Instance.ConnectionStringProvider = provider;
         }
     }
 }

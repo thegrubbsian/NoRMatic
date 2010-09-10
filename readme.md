@@ -124,11 +124,19 @@ In the example below, any calls to Save() will execute the anonymous function re
 
 ### AfterSave Behaviors
 
+	NoRMaticModel<T>.AddAfterSaveBehavior(Action<T>) [void]
+	
+AfterSave behaviors are simply actions that are executed immediately after any call to Save() and after a version is created if EnableVersioning is set.
 
 ### BeforeDelete Behaviors
+
+	NoRMaticModel<T>.AddBeforeDeleteBehavior(Func<T, bool>) [void]
 
 
 ### AfterDelete Behaviors
 
+	NoRMaticModel<T>.AddAfterDeleteBehavior(Action<T>) [void]
+
 
 ## Configuration/Initialization
+Configuration for NoRMatic is done in a global.
