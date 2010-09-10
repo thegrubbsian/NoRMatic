@@ -82,7 +82,35 @@ The base set of validation attributes doesn't support complex nested types (such
 	order.Save(); // would only persist the document if no errors exist
 
 ## Behaviors
+Behaviors is a way to add universal functionality to a collection without needing to override any base types as well as to simulate event hooks at certain points in CRUD operations.  There are five types of behaviors that can be added to a type:
 
+* Query
+* BeforeSave
+* AfterSave
+* BeforeDelete
+* AfterDelete
+
+Behaviors are basically just anonymous functions which are executed before or after an operation.  In the case of Query behaviors, the function is an expression which is added to the query to be executed (used in Find() and All() methods).  Behaviors are registered through static methods on any type which inherits from NoRMaticModel<T>.
+	
+### Query Behaviors
+
+	NoRMaticModel<T>.AddQueryBehavior(Expression<Func<T, bool>>>) [void]
+
+In the example below, the Find() expression will be combined with the query behavior expression and will limit results to those documents with an Inventory greater than 0 and a Supplier of "ACME".  Query behaviors can be used to apply universal limiting to queries in multi-tennant or user security situations.
+
+	Product.AddQueryBehavior(x => x.Inventory > 0);
+	var products = Product.Find(x => x.Supplier == "ACME");
+
+### BeforeSave Behaviors
+
+
+### AfterSave Behaviors
+
+
+### BeforeDelete Behaviors
+
+
+### AfterDelete Behaviors
 
 
 ## Configuration/Initialization
