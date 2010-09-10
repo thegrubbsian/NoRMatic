@@ -1,5 +1,5 @@
 #NoRMatic
-NoRMatic is a wrapper/extender for the excellent NoRM library for interacting with MongoDB.  NoRM exposes a complete LINQ provider over MongoDB collections.  NoRMatic applies an easy-to-use API in an ActiveRecord style using NoRM as it's underlying data access layer.  NoRMatic also provides behavior hooks for before and after save, before and after, delete, soft deleting, versioning, and basic auditing.
+NoRMatic is a wrapper/extender for the excellent NoRM library (thanks to Andrew Theken) for interacting with MongoDB in .NET.  NoRM exposes a complete LINQ provider over MongoDB collections along with helpers for index and collection management as well as strongly typed document mapping.  NoRMatic applies an easy-to-use API in an ActiveRecord style using NoRM as it's underlying data access layer.  NoRMatic also provides behavior hooks for before and after save, before and after delete, as well as soft deleting, versioning, and basic auditing.
 
 ##Basics
 Most of what you'll need to use NoRMatic is provided in the NoRMaticModel<T> base class.  Any class inheriting from this will be able to take advantage of the following members:
@@ -32,20 +32,16 @@ Most of what you'll need to use NoRMatic is provided in the NoRMaticModel<T> bas
 ## Soft Deletes
 To enable soft delete on a type, use the static method EnableSoftDelete() on any NoRMaticModel<T> type.  For example, the following will enable soft delete for all instances of Customer or Product.
 	
-<pre><code>
-Customer.EnableSoftDelete();
-Product.EnableSoftDelete();
-</code></pre>
+	Customer.EnableSoftDelete();
+	Product.EnableSoftDelete();
 
 When soft delete is enabled, any calls to Delete() will not remove the document from the collection, but will set the documents IsDeleted property to true and the DateDeleted property to the current date.  The document will no longer be updateable, you will be able to access it, but not save any changes to the documents properties.
 
 ## Versioning
 To enable versioning on a type, use the static method EnableVersioning() on any NoRMaticModel<T> type.  For example, the following will enable versioning for all instances of Note and MedicalRecord.
 	
-<pre><code>
-Note.EnableVersioning();
-MedicalRecord.EnableVersioning();
-</code></pre>
+	Note.EnableVersioning();
+	MedicalRecord.EnableVersioning();
 
 Versions are stored in the same collection as the source documents except they have three additional properties set: IsVersion, DateVersioned, and VersionOfId.  The version documents recieve a new Id but their VersionOfId property points back to the Id of the source document.  Each instance of a versioned document has a GetVersions() method wich will return all past versions of the document.
 
