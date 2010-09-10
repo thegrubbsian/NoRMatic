@@ -141,7 +141,8 @@ namespace NoRMatic {
         /// Returns all previous versions of the entity if the EnableVersioning flag is set for this type.
         /// </summary>
         public IEnumerable<T> GetVersions() {
-            return GetMongoCollection().Find(new { IsVersion = true, VersionOfId = Id });
+            return GetMongoCollection().Find(new { IsVersion = true, VersionOfId = Id })
+                .OrderByDescending(x => x.DateVersioned);
         }
 
         private List<ValidationResult> Validate() {
