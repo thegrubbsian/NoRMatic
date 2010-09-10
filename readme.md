@@ -114,6 +114,13 @@ In the example below, the Find() expression will be combined with the query beha
 
 ### BeforeSave Behaviors
 
+	NoRMaticModel<T>.AddBeforeSaveBehavior(Func<T, bool>) [void]
+
+In the example below, any calls to Save() will execute the anonymous function registered as BeforeSave behaviors for the given type.  Notice that the function returns a boolean, if any BeforeSave behavior functions return false the save will be aborted.  Among other uses, this allows for a handy just-in-time validation hook.
+
+	Product.AddBeforeSaveBehavior(x => x.AccountId == CurrentAccountId); // Configuration
+	var product = new Product { ... }
+	product.Save(); // Executes any registered before save behaviors
 
 ### AfterSave Behaviors
 
