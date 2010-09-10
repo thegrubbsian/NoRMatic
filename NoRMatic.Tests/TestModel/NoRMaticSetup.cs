@@ -2,7 +2,7 @@
 
     public class NoRMaticSetup : INoRMaticInitializer {
 
-        public void Initialize() {
+        public void Setup() {
             
             Subscriber.EnableVersioning();
             Subscriber.AddQueryBehavior(x => x.City == "Charlotte");

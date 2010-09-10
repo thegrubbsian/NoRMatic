@@ -139,4 +139,26 @@ AfterSave behaviors are simply actions that are executed immediately after any c
 
 
 ## Configuration/Initialization
-Configuration for NoRMatic is done in a global.
+Configuration for NoRMatic is done via the static methods of NoRMaticModel<T> and NoRMaticConfig.  Executing the configurations is a simple matter of creating a class which implements INoRMaticInitializer.  The Setup() methods of any class implementing this interface will be executed when the NoRMaticConfig.Initialize() method is called, in a web application you might place the call to Initialize() in your Global.asax Application_Start event which would setup NoRMatic for the session.  For example:
+	
+	// Somewhere in your project
+	public class NoRMaticSetup : INoRMaticInitializer {
+		public void Setup() {
+			
+			NoRMaticConfig.SetConnectionStringProvider(() => GetConnectionStringFromSomewhere());
+			
+			Customer.EnableSoftDelete();
+			Customer.EnableVersioning();
+			Customer.AddQueryBehavior(x => x.AccountID == Session["AccountID"]);
+			
+			Product.EnableSoftDelete();
+			
+			Order.EnableSoftDelete();
+			Order.EnableVersioning();
+		}
+	}
+	
+	// In you Global.asax
+	public static void Application_Start() {
+		NoRMaticConfig.Initialize();
+	}	

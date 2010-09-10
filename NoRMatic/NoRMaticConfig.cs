@@ -20,7 +20,7 @@ namespace NoRMatic {
             foreach (var type in types) {
                 try {
                     var initializer = Activator.CreateInstance(type);
-                    ((INoRMaticInitializer) initializer).Initialize();
+                    ((INoRMaticInitializer) initializer).Setup();
                 } catch { }
             }
         }
