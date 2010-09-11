@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Configuration;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace NoRMatic {
 
@@ -42,6 +43,60 @@ namespace NoRMatic {
         /// </summary>
         public static void SetConnectionStringProvider(Func<string> provider) {
             GlobalConfigContainer.Instance.ConnectionStringProvider = provider;
+        }
+
+        /// <summary>
+        /// BeforeSaveBehaviors are functions called before any Save for entities implementing a given abstract marker.  If any of these
+        /// functions return 'true' the save will NOT proceed.  This can be useful if there are pre-save validations or other checks
+        /// that need to be made that may stop the save.
+        /// </summary>
+        public static void AddBeforeSaveAbstractBehavior<T>(Func<dynamic, bool> action) {
+
+            if (!GlobalConfigContainer.Instance.BeforeSave.ContainsKey(typeof(T)))
+                GlobalConfigContainer.Instance.BeforeSave.Add(typeof(T), new List<Func<dynamic, bool>>());
+
+            GlobalConfigContainer.Instance.BeforeSave[typeof(T)].Add(action);
+        }
+
+        /// <summary>
+        /// Actions executed after a save and after a version is created if EnableVersioning is set.
+        /// </summary>
+        public static void AddAfterSaveAbstractBehavior<T>(Action<dynamic> action) {
+
+            if (!GlobalConfigContainer.Instance.AfterSave.ContainsKey(typeof(T)))
+                GlobalConfigContainer.Instance.AfterSave.Add(typeof(T), new List<Action<dynamic>>());
+
+            GlobalConfigContainer.Instance.AfterSave[typeof(T)].Add(action);
+        }
+
+        /// <summary>
+        /// BeforeDeleteBehaviors are functions called before any Delete for the collection.  If any of these
+        /// functions return 'true' the delete will not proceed (including soft deletes).
+        /// </summary>
+        public static void AddBeforeDeleteAbstractBehavior<T>(Func<dynamic, bool> action) {
+
+            if (!GlobalConfigContainer.Instance.BeforeDelete.ContainsKey(typeof(T)))
+                GlobalConfigContainer.Instance.BeforeDelete.Add(typeof(T), new List<Func<dynamic, bool>>());
+            
+            GlobalConfigContainer.Instance.BeforeDelete[typeof(T)].Add(action);
+        }
+
+        /// <summary>
+        /// Actions executed after a delete.
+        /// </summary>
+        public static void AddAfterDeleteAbstractBehavior<T>(Action<dynamic> action) {
+
+            if (!GlobalConfigContainer.Instance.AfterDelete.ContainsKey(typeof(T)))
+                GlobalConfigContainer.Instance.AfterDelete.Add(typeof(T), new List<Action<dynamic>>());
+
+            GlobalConfigContainer.Instance.AfterDelete[typeof(T)].Add(action);
+        }
+
+        /// <summary>
+        /// Removes all registered abstract behaviors.
+        /// </summary>
+        public static void DropAbstractBehaviors() {
+            GlobalConfigContainer.Instance.DropBehaviors();
         }
     }
 }

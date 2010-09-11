@@ -53,6 +53,7 @@
     <Compile Include="TestModel\Customer.cs" />
     <Compile Include="TestModel\MedicalRecord.cs" />
     <Compile Include="TestModel\NoRMaticSetup.cs" />
+    <Compile Include="TestModel\Order.cs" />
     <Compile Include="TestModel\Patient.cs" />
     <Compile Include="TestModel\Subscriber.cs" />
   </ItemGroup>

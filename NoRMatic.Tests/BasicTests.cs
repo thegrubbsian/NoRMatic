@@ -308,5 +308,18 @@ namespace NoRMatic.Tests {
 
             Assert.AreEqual(medicalRecord.UpdatedBy, "user1");
         }
+
+        [Test]
+        public void GivenAModelWithAnAbstractBehavior_Save_ShouldApplyTheAbstractRegisteredBehavior() {
+            
+            NoRMaticConfig.DropAbstractBehaviors();
+
+            NoRMaticConfig.AddBeforeSaveAbstractBehavior<IBoundByAccount>(x => { x.AccountName = "some_name"; return true; });
+
+            var order = new Order { Quantity = 20, Sky = "A3EF29" };
+            order.Save();
+
+            Assert.AreEqual("some_name", order.AccountName);
+        }
     }
 }

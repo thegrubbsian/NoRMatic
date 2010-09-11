@@ -76,6 +76,15 @@ namespace NoRMatic {
         }
 
         /// <summary>
+        /// Returns a single entity which matches the expression.  An exception will be thrown if more than one document
+        /// matches the expression.
+        /// </summary>
+        public static T FindOne(Expression<Func<T, bool>> expression,
+            bool includeDeleted = false, bool includeVersions = false) {
+            return Find(expression, includeDeleted, includeVersions).SingleOrDefault();
+        }
+
+        /// <summary>
         /// Returns a single entity by it's Id from the database.
         /// </summary>
         public static T GetById(ObjectId id) {
@@ -97,14 +106,15 @@ namespace NoRMatic {
         /// Creates or saves the entity to the database.  If the EnableVersioning behavior is set then a version
         /// will be created for each save.  NOTE: Versions are created regardless of whether changes exist or not.
         /// </summary>
-        public void Save() {
+        public virtual void Save() {
 
             if (ModelConfig.EnableSoftDelete && IsDeleted) return;
             if (ModelConfig.EnableVersioning && IsVersion) return;
             if (Validate().Count > 0) return;
 
-            if (ModelConfig.BeforeSave.Count > 0)
-                if (ModelConfig.BeforeSave.Any(x => !x((T)this))) return;
+            if (!DoBeforeBehaviors(
+                GlobalConfig.BeforeSave.GetByType(GetType()), 
+                ModelConfig.BeforeSave)) return;
 
             DateUpdated = DateTime.Now;
 
@@ -115,17 +125,20 @@ namespace NoRMatic {
 
             if (ModelConfig.EnableVersioning) SaveVersion();
 
-            ModelConfig.AfterSave.ForEach(x => x((T)this));
+            DoAfterBehaviors(
+                GlobalConfig.AfterSave.GetByType(GetType()), 
+                ModelConfig.AfterSave);
         }
 
         /// <summary>
         /// Deletes or sets IsDeleted flag for the entity depending on whether or not the EnableSoftDelete
         /// behavior is set for this type.
         /// </summary>
-        public void Delete() {
+        public virtual void Delete() {
 
-            if (ModelConfig.BeforeDelete.Count > 0)
-                if (ModelConfig.BeforeDelete.Any(x => !x((T)this))) return;
+            if (!DoBeforeBehaviors(
+                GlobalConfig.BeforeDelete.GetByType(GetType()), 
+                ModelConfig.BeforeDelete)) return;
 
             if (ModelConfig.EnableSoftDelete) {
                 SoftDelete();
@@ -134,13 +147,15 @@ namespace NoRMatic {
                 GetMongoCollection().Delete((T)this);
             }
 
-            ModelConfig.AfterDelete.ForEach(x => x((T)this));
+            DoAfterBehaviors(
+                GlobalConfig.AfterDelete.GetByType(GetType()),
+                ModelConfig.AfterDelete);
         }
 
         /// <summary>
         /// Returns all previous versions of the entity if the EnableVersioning flag is set for this type.
         /// </summary>
-        public IEnumerable<T> GetVersions() {
+        public virtual IEnumerable<T> GetVersions() {
             return GetMongoCollection().Find(new { IsVersion = true, VersionOfId = Id })
                 .OrderByDescending(x => x.DateVersioned);
         }
@@ -175,6 +190,24 @@ namespace NoRMatic {
             var versions = GetMongoCollection().Find(new { VersionOfId = Id }).ToList();
             for (var i = 0; i < versions.Count(); i++)
                 GetMongoCollection().Delete(versions[i]);
+        }
+
+        private bool DoBeforeBehaviors(
+            IEnumerable<Func<dynamic, bool>> global, IEnumerable<Func<T, bool>> model) {
+
+            var all = true;
+
+            if (global.Any(x => x(this) == false)) all = false;
+            if (model.Any(x => x((T)this) == false)) all = false;
+
+            return all;
+        }
+
+        private void DoAfterBehaviors(
+            List<Action<dynamic>> global, List<Action<T>> model) {
+
+            global.ForEach(x => x(this));
+            model.ForEach(x => x((T)this));
         }
     }
 }
