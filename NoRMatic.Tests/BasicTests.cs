@@ -310,16 +310,36 @@ namespace NoRMatic.Tests {
         }
 
         [Test]
-        public void GivenAModelWithAnAbstractBehavior_Save_ShouldApplyTheAbstractRegisteredBehavior() {
+        public void GivenAModelWithAnAbstractBehavior_Save_ShouldApplyTheAbstractBehavior() {
             
             NoRMaticConfig.DropAbstractBehaviors();
 
-            NoRMaticConfig.AddBeforeSaveAbstractBehavior<IBoundByAccount>(x => { x.AccountName = "some_name"; return true; });
+            NoRMaticConfig.AddBeforeSaveAbstractBehavior<IBoundByAccount>(x => { x.AccountName = "accountA"; return true; });
 
-            var order = new Order { Quantity = 20, Sky = "A3EF29" };
+            var order = new Order { Quantity = 20, Sku = "A3EF29" };
             order.Save();
 
-            Assert.AreEqual("some_name", order.AccountName);
+            Assert.AreEqual("accountA", order.AccountName);
+        }
+
+        [Test]
+        public void GivenAModelWithAnAbstractQueryBehavior_Find_ShouldRespectTheAbstractBehavior() {
+            
+            NoRMaticConfig.DropAbstractBehaviors();
+
+            NoRMaticConfig.AddQueryBehavior<IBoundByAccount>(x => x.AccountName == "accountA");
+
+            var orderA = new Order { AccountName = "accountA", Sku = "RF94W92", Quantity = 3 };
+            var orderB = new Order { AccountName = "accountA", Sku = "399RJE2E", Quantity = 8 };
+            var orderC = new Order { AccountName = "accountB", Sku = "39FSWJW", Quantity = 5 };
+
+            orderA.Save();
+            orderB.Save();
+            orderC.Save();
+
+            var fetched = Order.Find(x => x.Quantity > 0);
+
+            Assert.IsTrue(!fetched.Any(x => x.AccountName != "accountA"));
         }
     }
 }

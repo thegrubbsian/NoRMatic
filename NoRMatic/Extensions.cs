@@ -7,13 +7,13 @@ namespace NoRMatic {
     
     public static class Extensions {
 
-        public static List<Expression<Func<dynamic, bool>>> GetByType(
-            this Dictionary<Type, List<Expression<Func<dynamic, bool>>>> @this, Type type) {
+        public static List<Expression<Func<T, bool>>> GetByType<T>(
+            this Dictionary<Type, object> @this) {
 
-            var list = new List<Expression<Func<dynamic, bool>>>();
+            var list = new List<Expression<Func<T, bool>>>();
 
-            foreach (var item in @this.Where(item => item.Key.IsAssignableFrom(type)))
-                list.AddRange(item.Value);
+            foreach (var item in @this.Where(item => item.Key.IsAssignableFrom(typeof(T))))
+                list.AddRange((List<Expression<Func<T, bool>>>)item.Value);
 
             return list;
         }

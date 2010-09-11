@@ -25,6 +25,12 @@ namespace NoRMatic {
             set { _connectionStringProvider = value; }
         }
 
+        private Dictionary<Type, object> _query = new Dictionary<Type, object>();
+        public Dictionary<Type, object> Query {
+            get { return _query; }
+            set { _query = value; }
+        }
+
         private Dictionary<Type, List<Func<dynamic, bool>>> _beforeSave = new Dictionary<Type, List<Func<dynamic, bool>>>();
         public Dictionary<Type, List<Func<dynamic, bool>>> BeforeSave {
             get { return _beforeSave; }
@@ -50,6 +56,7 @@ namespace NoRMatic {
         }
 
         public void DropBehaviors() {
+            _query.Clear();
             _beforeSave.Clear();
             _afterSave.Clear();
             _beforeDelete.Clear();

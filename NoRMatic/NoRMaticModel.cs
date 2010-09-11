@@ -42,7 +42,10 @@ namespace NoRMatic {
                 return GetMongoCollection().Find();
 
             var query = GetMongoCollection().AsQueryable();
+
             query = ModelConfig.Query.Aggregate(query, (c, b) => c.Where(b));
+            query = GlobalConfig.Query.GetByType<T>()
+                .Aggregate(query, (c, b) => c.Where(b));
 
             if (ModelConfig.EnableVersioning)
                 query = query.Where(x => !x.IsVersion);
@@ -63,8 +66,9 @@ namespace NoRMatic {
 
             var query = GetMongoCollection().AsQueryable().Where(expression);
 
-            if (ModelConfig.Query.Count > 0)
-                query = ModelConfig.Query.Aggregate(query, (c, b) => c.Where(b));
+            query = ModelConfig.Query.Aggregate(query, (c, b) => c.Where(b));
+            query = GlobalConfig.Query.GetByType<T>()
+                .Aggregate(query, (c, b) => c.Where(b));
 
             if (ModelConfig.EnableSoftDelete && !includeDeleted)
                 query = query.Where(x => !x.IsDeleted);

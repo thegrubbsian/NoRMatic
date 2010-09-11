@@ -46,6 +46,17 @@ namespace NoRMatic {
         }
 
         /// <summary>
+        /// Extends the Where conditions of any query executed for types implementing the given abstract type;
+        /// </summary>
+        public static void AddQueryBehavior<T>(Expression<Func<T , bool>> action) {
+            
+            if (!GlobalConfigContainer.Instance.Query.ContainsKey(typeof(T)))
+                GlobalConfigContainer.Instance.Query.Add(typeof(T), new List<Expression<Func<T, bool>>>());
+
+            ((List<Expression<Func<T, bool>>>)GlobalConfigContainer.Instance.Query[typeof(T)]).Add(action);
+        }
+
+        /// <summary>
         /// BeforeSaveBehaviors are functions called before any Save for entities implementing a given abstract marker.  If any of these
         /// functions return 'true' the save will NOT proceed.  This can be useful if there are pre-save validations or other checks
         /// that need to be made that may stop the save.

@@ -6,7 +6,7 @@
 
     public class Order : NoRMaticModel<Order>, IBoundByAccount {
         public string AccountName { get; set; }
-        public string Sky { get; set; }
+        public string Sku { get; set; }
         public int Quantity { get; set; }
     }
 }
