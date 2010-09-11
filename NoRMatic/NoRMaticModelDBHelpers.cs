@@ -13,7 +13,11 @@ namespace NoRMatic {
         /// Returns a raw NoRM collection which allows direct access to all of the underlying NoRM methods.
         /// </summary>
         public static IMongoCollection<T> GetMongoCollection() {
-            using (var db = Mongo.Create(NoRMaticConfig.ConnectionString))
+
+            var conString = ModelConfig.ConnectionStringProvider != null ?
+                ModelConfig.ConnectionStringProvider() : NoRMaticConfig.ConnectionString;
+
+            using (var db = Mongo.Create(conString))
                 return db.GetCollection<T>();
         }
 
@@ -28,6 +32,10 @@ namespace NoRMatic {
                 indexName = typeof (T).Name + "_Index_" + ObjectId.NewObjectId();
 
             GetMongoCollection().CreateIndex(indexKey, indexName, isUnique, direction);
+        }
+
+        public static void SetConnectionStringProvider(Func<string> provider) {
+            ModelConfig.ConnectionStringProvider = provider;
         }
     }
 }

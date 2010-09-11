@@ -11,6 +11,14 @@ namespace NoRMatic {
 
     public abstract partial class NoRMaticModel<T> where T : NoRMaticModel<T> {
 
+        private static GlobalConfigContainer GlobalConfig {
+            get { return GlobalConfigContainer.Instance; }
+        }
+
+        private static ModelConfigContainer<T> ModelConfig {
+            get { return ModelConfigContainer<T>.Instance; }
+        }
+
         public ObjectId Id { get; internal set; }
         public DateTime DateUpdated { get; internal set; }
 
@@ -30,16 +38,16 @@ namespace NoRMatic {
         /// </summary>
         public static IEnumerable<T> All() {
 
-            if (Behaviors.Query.Count == 0 && !Behaviors.EnableSoftDelete)
+            if (ModelConfig.Query.Count == 0 && !ModelConfig.EnableSoftDelete)
                 return GetMongoCollection().Find();
 
             var query = GetMongoCollection().AsQueryable();
-            query = Behaviors.Query.Aggregate(query, (c, b) => c.Where(b));
+            query = ModelConfig.Query.Aggregate(query, (c, b) => c.Where(b));
 
-            if (Behaviors.EnableVersioning)
+            if (ModelConfig.EnableVersioning)
                 query = query.Where(x => !x.IsVersion);
 
-            if (Behaviors.EnableSoftDelete)
+            if (ModelConfig.EnableSoftDelete)
                 query = query.Where(x => !x.IsDeleted);
 
             return query.ToList();
@@ -55,13 +63,13 @@ namespace NoRMatic {
 
             var query = GetMongoCollection().AsQueryable().Where(expression);
 
-            if (Behaviors.Query.Count > 0)
-                query = Behaviors.Query.Aggregate(query, (c, b) => c.Where(b));
+            if (ModelConfig.Query.Count > 0)
+                query = ModelConfig.Query.Aggregate(query, (c, b) => c.Where(b));
 
-            if (Behaviors.EnableSoftDelete && !includeDeleted)
+            if (ModelConfig.EnableSoftDelete && !includeDeleted)
                 query = query.Where(x => !x.IsDeleted);
 
-            if (Behaviors.EnableVersioning && !includeVersions)
+            if (ModelConfig.EnableVersioning && !includeVersions)
                 query = query.Where(x => !x.IsVersion);
 
             return query;
@@ -91,23 +99,23 @@ namespace NoRMatic {
         /// </summary>
         public void Save() {
 
-            if (Behaviors.EnableSoftDelete && IsDeleted) return;
-            if (Behaviors.EnableVersioning && IsVersion) return;
+            if (ModelConfig.EnableSoftDelete && IsDeleted) return;
+            if (ModelConfig.EnableVersioning && IsVersion) return;
             if (Validate().Count > 0) return;
 
-            if (Behaviors.BeforeSave.Count > 0)
-                if (Behaviors.BeforeSave.Any(x => !x((T)this))) return;
+            if (ModelConfig.BeforeSave.Count > 0)
+                if (ModelConfig.BeforeSave.Any(x => !x((T)this))) return;
 
             DateUpdated = DateTime.Now;
 
-            if (Behaviors.EnableUserAuditing && Config.CurrentUserProvider != null)
-                UpdatedBy = Config.CurrentUserProvider();
+            if (ModelConfig.EnableUserAuditing && GlobalConfig.CurrentUserProvider != null)
+                UpdatedBy = GlobalConfig.CurrentUserProvider();
 
             GetMongoCollection().Save((T)this);
 
-            if (Behaviors.EnableVersioning) SaveVersion();
+            if (ModelConfig.EnableVersioning) SaveVersion();
 
-            Behaviors.AfterSave.ForEach(x => x((T)this));
+            ModelConfig.AfterSave.ForEach(x => x((T)this));
         }
 
         /// <summary>
@@ -116,17 +124,17 @@ namespace NoRMatic {
         /// </summary>
         public void Delete() {
 
-            if (Behaviors.BeforeDelete.Count > 0)
-                if (Behaviors.BeforeDelete.Any(x => !x((T)this))) return;
+            if (ModelConfig.BeforeDelete.Count > 0)
+                if (ModelConfig.BeforeDelete.Any(x => !x((T)this))) return;
 
-            if (Behaviors.EnableSoftDelete) {
+            if (ModelConfig.EnableSoftDelete) {
                 SoftDelete();
             } else {
-                if (Behaviors.EnableVersioning) DeleteVersions();
+                if (ModelConfig.EnableVersioning) DeleteVersions();
                 GetMongoCollection().Delete((T)this);
             }
 
-            Behaviors.AfterDelete.ForEach(x => x((T)this));
+            ModelConfig.AfterDelete.ForEach(x => x((T)this));
         }
 
         /// <summary>

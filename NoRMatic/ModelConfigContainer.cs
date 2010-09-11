@@ -4,17 +4,18 @@ using System.Linq.Expressions;
 
 namespace NoRMatic {
 
-    internal sealed class BehaviorContainer<T> {
+    internal sealed class ModelConfigContainer<T> {
 
         class Nested {
             static Nested() { } // Constructor so compiler doesn't mark beforefieldinit
-            internal static readonly BehaviorContainer<T> instance = new BehaviorContainer<T>();
+            internal static readonly ModelConfigContainer<T> instance = new ModelConfigContainer<T>();
         }
 
-        public static BehaviorContainer<T> Instance {
+        public static ModelConfigContainer<T> Instance {
             get { return Nested.instance; }
         }
 
+        public Func<string> ConnectionStringProvider { get; set; }
         public bool EnableVersioning { get; set; }
         public bool EnableSoftDelete { get; set; }
         public bool EnableUserAuditing { get; set; }

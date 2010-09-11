@@ -3,14 +3,14 @@ using System.Configuration;
 
 namespace NoRMatic {
 
-    internal sealed class ConfigContainer {
+    internal sealed class GlobalConfigContainer {
 
         class Nested {
             static Nested() { } // Constructor so compiler doesn't mark beforefieldinit
-            internal static readonly ConfigContainer instance = new ConfigContainer();
+            internal static readonly GlobalConfigContainer instance = new GlobalConfigContainer();
         }
 
-        public static ConfigContainer Instance {
+        public static GlobalConfigContainer Instance {
             get { return Nested.instance; }
         }
 

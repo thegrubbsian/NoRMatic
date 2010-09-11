@@ -19,19 +19,11 @@ namespace NoRMatic {
         // User Auditing
         public string UpdatedBy { get; internal set; }
 
-        private static BehaviorContainer<T> Behaviors {
-            get { return BehaviorContainer<T>.Instance; }
-        }
-
-        private static ConfigContainer Config {
-            get { return ConfigContainer.Instance; }
-        }
-
         /// <summary>
         /// Extends the Where conditions of any query executed for a given collection.
         /// </summary>
         public static void AddQueryBehavior(Expression<Func<T, bool>> action) {
-            Behaviors.Query.Add(action);
+            ModelConfig.Query.Add(action);
         }
 
         /// <summary>
@@ -40,14 +32,14 @@ namespace NoRMatic {
         /// that need to be made that may stop the save.
         /// </summary>
         public static void AddBeforeSaveBehavior(Func<T, bool> action) {
-            Behaviors.BeforeSave.Add(action);
+            ModelConfig.BeforeSave.Add(action);
         }
 
         /// <summary>
         /// Actions executed after a save and after a version is created if EnableVersioning is set.
         /// </summary>
         public static void AddAfterSaveBehavior(Action<T> action) {
-            Behaviors.AfterSave.Add(action);
+            ModelConfig.AfterSave.Add(action);
         }
 
         /// <summary>
@@ -55,21 +47,21 @@ namespace NoRMatic {
         /// functions return 'true' the delete will not proceed (including soft deletes).
         /// </summary>
         public static void AddBeforeDeleteBehavior(Func<T, bool> action) {
-            Behaviors.BeforeDelete.Add(action);
+            ModelConfig.BeforeDelete.Add(action);
         }
 
         /// <summary>
         /// Actions executed after a delete.
         /// </summary>
         public static void AddAfterDeleteBehavior(Action<T> action) {
-            Behaviors.AfterDelete.Add(action);
+            ModelConfig.AfterDelete.Add(action);
         }
 
         /// <summary>
         /// Drops all registered behaviors and resets EnableSoftDelete and EnableVersioning to false.
         /// </summary>
         public static void DropBehaviors() {
-            Behaviors.DropBehaviors();
+            ModelConfig.DropBehaviors();
         }
 
         /// <summary>
@@ -78,7 +70,7 @@ namespace NoRMatic {
         /// are disallowed.
         /// </summary>
         public static void EnableSoftDelete() {
-            Behaviors.EnableSoftDelete = true;
+            ModelConfig.EnableSoftDelete = true;
         }
 
         /// <summary>
@@ -88,7 +80,7 @@ namespace NoRMatic {
         /// when their originating document is deleted unless soft delete is enabled.
         /// </summary>
         public static void EnableVersioning() {
-            Behaviors.EnableVersioning = true;
+            ModelConfig.EnableVersioning = true;
         }
 
         /// <summary>
@@ -97,19 +89,19 @@ namespace NoRMatic {
         /// EnableVersioning, each version will also be marked with the user who created the version with the VersionMadeBy property.
         /// </summary>
         public static void EnableUserAuditing() {
-            Behaviors.EnableUserAuditing = true;
+            ModelConfig.EnableUserAuditing = true;
         }
 
         public static void DisableSoftDelete() {
-            Behaviors.EnableSoftDelete = false;
+            ModelConfig.EnableSoftDelete = false;
         }
 
         public static void DisableVersioning() {
-            Behaviors.EnableVersioning = false;
+            ModelConfig.EnableVersioning = false;
         }
 
         public static void DisableUserAuditing() {
-            Behaviors.EnableUserAuditing = false;
+            ModelConfig.EnableUserAuditing = false;
         }
     }
 }

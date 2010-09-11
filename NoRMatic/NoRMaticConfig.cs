@@ -7,7 +7,7 @@ namespace NoRMatic {
     public static class NoRMaticConfig {
 
         public static string ConnectionString {
-            get { return ConfigContainer.Instance.ConnectionStringProvider(); }
+            get { return GlobalConfigContainer.Instance.ConnectionStringProvider(); }
         }
 
         public static void Initialize() {
@@ -31,7 +31,7 @@ namespace NoRMatic {
         /// which looks up the current user to be changed at runtime.
         /// </summary>
         public static void SetCurrentUserProvider(Func<string> provider) {
-            ConfigContainer.Instance.CurrentUserProvider = provider;
+            GlobalConfigContainer.Instance.CurrentUserProvider = provider;
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace NoRMatic {
         /// string is created.
         /// </summary>
         public static void SetConnectionStringProvider(Func<string> provider) {
-            ConfigContainer.Instance.ConnectionStringProvider = provider;
+            GlobalConfigContainer.Instance.ConnectionStringProvider = provider;
         }
     }
 }
