@@ -86,14 +86,6 @@ namespace NoRMatic {
         }
 
         /// <summary>
-        /// Returns a raw NoRM collection which allows direct access to all of the underlying NoRM methods.
-        /// </summary>
-        public static IMongoCollection<T> GetMongoCollection() {
-            using (var db = Mongo.Create(NoRMaticConfig.ConnectionString))
-                return db.GetCollection<T>();
-        }
-
-        /// <summary>
         /// Creates or saves the entity to the database.  If the EnableVersioning behavior is set then a version
         /// will be created for each save.  NOTE: Versions are created regardless of whether changes exist or not.
         /// </summary>

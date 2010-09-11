@@ -161,4 +161,13 @@ Configuration for NoRMatic is done via the static methods of NoRMaticModel<T> an
 	// In you Global.asax
 	public static void Application_Start() {
 		NoRMaticConfig.Initialize();
-	}	
+	}
+	
+### Connection String Provider
+
+
+### Current User Provider
+
+
+### Indexing
+

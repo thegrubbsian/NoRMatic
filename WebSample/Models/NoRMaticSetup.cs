@@ -7,6 +7,7 @@ namespace WebSample.Models {
         public void Setup() {
             
             Patient.EnableVersioning();
+            Patient.AddIndex(x => new { x.LastName, x.FirstName });
         }
     }
 }
