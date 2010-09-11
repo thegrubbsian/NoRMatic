@@ -1,3 +1,5 @@
+#### NOTE: This is an alpha library, please use with caution.
+
 #NoRMatic
 NoRMatic is a wrapper/extender for the excellent [NoRM](http://www.normproject.com/) library (thanks to Andrew Theken) for interacting with MongoDB in .NET.  NoRM exposes a complete LINQ provider over MongoDB collections along with helpers for index and collection management as well as strongly typed document mapping.  NoRMatic applies an easy-to-use API in an ActiveRecord style using NoRM as it's underlying data access layer.  NoRMatic also provides behavior hooks for before and after save, before and after delete, as well as soft deleting, versioning, and basic auditing.
 
