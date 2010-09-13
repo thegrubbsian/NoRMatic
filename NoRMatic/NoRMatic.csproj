@@ -54,6 +54,7 @@
     <Compile Include="NoRMaticConfig.cs" />
     <Compile Include="NoRMaticModelBehaviors.cs" />
     <Compile Include="NoRMaticModelDBHelpers.cs" />
+    <Compile Include="NoRMaticModelQueryHelpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ValidateChildAttribute.cs" />
   </ItemGroup>

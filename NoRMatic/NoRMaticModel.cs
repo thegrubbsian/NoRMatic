@@ -74,15 +74,6 @@ namespace NoRMatic {
         }
 
         /// <summary>
-        /// Returns a single entity which matches the expression.  An exception will be thrown if more than one document
-        /// matches the expression.
-        /// </summary>
-        public static T FindOne(Expression<Func<T, bool>> expression,
-            bool includeDeleted = false, bool includeVersions = false) {
-            return Find(expression, includeDeleted, includeVersions).SingleOrDefault();
-        }
-
-        /// <summary>
         /// Returns a single entity by it's Id from the database.
         /// </summary>
         public static T GetById(ObjectId id) {
