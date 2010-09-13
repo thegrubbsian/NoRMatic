@@ -76,8 +76,12 @@ namespace NoRMatic {
         /// <summary>
         /// Returns a single entity by it's Id from the database.
         /// </summary>
-        public static T GetById(ObjectId id) {
-            return GetMongoCollection().FindOne(new { Id = id });
+        public static T GetById(ObjectId id,
+            bool includeDeleted = false, bool includeVersions = false) {
+
+            //return GetMongoCollection().FindOne(new {Id = id});
+
+            return Find(x => x.Id == id, includeDeleted, includeVersions).SingleOrDefault();
         }
 
         /// <summary>
@@ -99,11 +103,12 @@ namespace NoRMatic {
 
             if (ModelConfig.EnableSoftDelete && IsDeleted) return;
             if (ModelConfig.EnableVersioning && IsVersion) return;
-            if (Validate().Count > 0) return;
 
             if (!DoBeforeBehaviors(
                 GlobalConfig.BeforeSave.GetByType(GetType()), 
                 ModelConfig.BeforeSave)) return;
+
+            if (Validate().Count > 0) return;
 
             DateUpdated = DateTime.Now;
 
@@ -170,7 +175,7 @@ namespace NoRMatic {
         }
 
         private T Clone() {
-            var obj = GetById(Id);
+            var obj = GetMongoCollection().FindOne(new { Id });
             obj.Id = null;
             return obj;
         }

@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{B5E4DD1A-9613-4BF4-A88F-314762B4AD7C}</ProjectGuid>
+    <ProjectGuid>{483F500E-AEA9-44BF-8BE0-6DD50449402D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NoRMatic.Tests</RootNamespace>
-    <AssemblyName>NoRMatic.Tests</AssemblyName>
+    <RootNamespace>TestModel</RootNamespace>
+    <AssemblyName>TestModel</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,13 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Norm">
-      <HintPath>..\Lib\Norm.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework, Version=2.5.7.10213, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Lib\nunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
@@ -49,23 +42,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BasicTests.cs" />
+    <Compile Include="Customer.cs" />
+    <Compile Include="MedicalRecord.cs" />
+    <Compile Include="NoRMaticSetup.cs" />
+    <Compile Include="Order.cs" />
+    <Compile Include="Patient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Subscriber.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NoRMatic\NoRMatic.csproj">
       <Project>{AE1887A2-8810-4AA5-8477-A7B9A63644FD}</Project>
       <Name>NoRMatic</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TestModel\TestModel.csproj">
-      <Project>{483F500E-AEA9-44BF-8BE0-6DD50449402D}</Project>
-      <Name>TestModel</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

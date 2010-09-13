@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using NoRMatic;
 
-namespace NoRMatic.Tests.TestModel {
+namespace TestModel {
 
     public class Customer : NoRMaticModel<Customer> {
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq.Expressions;
 
 namespace NoRMatic {
 
@@ -19,9 +18,12 @@ namespace NoRMatic {
         public string ConnectionStringName { get; set; }
         public Func<string> CurrentUserProvider { get; set; }
 
-        private Func<string> _connectionStringProvider = () => ConfigurationManager.ConnectionStrings["NoRMaticConnectionString"].ConnectionString;
+        private Func<string> _connectionStringProvider;
         public Func<string> ConnectionStringProvider {
-            get { return _connectionStringProvider; }
+            get {
+                return _connectionStringProvider ??
+                       (_connectionStringProvider = () => ConfigurationManager.ConnectionStrings["NoRMaticConnectionString"].ConnectionString);
+            }
             set { _connectionStringProvider = value; }
         }
 

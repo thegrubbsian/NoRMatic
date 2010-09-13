@@ -1,4 +1,6 @@
-﻿namespace NoRMatic.Tests.TestModel {
+﻿using NoRMatic;
+
+namespace TestModel {
 
     public class MedicalRecord : NoRMaticModel<MedicalRecord> {
 

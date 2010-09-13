@@ -10,3 +10,6 @@ NoRMatic.Tests/*user
 WebSample/bin
 WebSample/obj
 WebSample/*user
+TestModel/bin
+TestModel/obj
+TestModel/*user

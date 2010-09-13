@@ -1,4 +1,6 @@
-﻿namespace NoRMatic.Tests.TestModel {
+﻿using NoRMatic;
+
+namespace TestModel {
 
     public interface IBoundByAccount {
         string AccountName { get; set; }

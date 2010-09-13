@@ -1,8 +1,6 @@
-﻿using System;
-using System.Linq;
-using System.Linq.Expressions;
-using NoRMatic.Tests.TestModel;
+﻿using System.Linq;
 using NUnit.Framework;
+using TestModel;
 
 namespace NoRMatic.Tests {
 
@@ -107,7 +105,7 @@ namespace NoRMatic.Tests {
 
             patient.Delete();
 
-            var fetched = Patient.GetById(patient.Id);
+            var fetched = Patient.GetById(patient.Id, includeDeleted: true);
 
             Assert.IsNotNull(fetched);
             Assert.IsTrue(fetched.IsDeleted);
@@ -124,12 +122,12 @@ namespace NoRMatic.Tests {
 
             patient.Delete();
 
-            var fetched = Patient.GetById(patient.Id);
+            var fetched = Patient.GetById(patient.Id, includeDeleted: true);
 
             fetched.FirstName = "NEWFIRSTNAME";
             fetched.Save();
 
-            var reFetched = Patient.GetById(patient.Id);
+            var reFetched = Patient.GetById(patient.Id, includeDeleted: true);
 
             Assert.AreEqual(reFetched.FirstName, patient.FirstName);
         }
