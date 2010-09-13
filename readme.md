@@ -134,11 +134,17 @@ AfterSave behaviors are simply actions that are executed immediately after any c
 
 	NoRMaticModel<T>.AddBeforeDeleteBehavior(Func<T, bool>) [void]
 
+In the example below, any calls to Delete() will execute the anonymous function registered as BeforeDelete behaviors for the given type.  Notice that the function returns a boolean, like the BeforeSave behaviors returning false from any of the registered BeforeDelete behaviors will abort the delete action.
+
+	Product.AddBeforeDeleteBehavior(x => x.AccountId == CurrentAccountId); //Configuration
+	var product = new Product { ... };
+	product.Delete(); // Execute any registered before delete behaviors
 
 ### AfterDelete Behaviors
 
 	NoRMaticModel<T>.AddAfterDeleteBehavior(Action<T>) [void]
 
+AfterDelete behaviors are simply actions that are executed immediately after any call to Delete().
 
 ## Configuration/Initialization
 Configuration for NoRMatic is done via the static methods of NoRMaticModel<T> and NoRMaticConfig.  Executing the configurations is a simple matter of creating a class which implements INoRMaticInitializer.  The Setup() methods of any class implementing this interface will be executed when the NoRMaticConfig.Initialize() method is called, in a web application you might place the call to Initialize() in your Global.asax Application_Start event which would setup NoRMatic for the session.  For example:
