@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 
 namespace NoRMatic {
+
     
     public static class Extensions {
 

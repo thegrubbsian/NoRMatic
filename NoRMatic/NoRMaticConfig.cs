@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 
 namespace NoRMatic {
 
@@ -43,17 +42,6 @@ namespace NoRMatic {
         /// </summary>
         public static void SetConnectionStringProvider(Func<string> provider) {
             GlobalConfigContainer.Instance.ConnectionStringProvider = provider;
-        }
-
-        /// <summary>
-        /// Extends the Where conditions of any query executed for types implementing the given abstract type;
-        /// </summary>
-        public static void AddQueryBehavior<T>(Expression<Func<T , bool>> action) {
-            
-            if (!GlobalConfigContainer.Instance.Query.ContainsKey(typeof(T)))
-                GlobalConfigContainer.Instance.Query.Add(typeof(T), new List<Expression<Func<T, bool>>>());
-
-            ((List<Expression<Func<T, bool>>>)GlobalConfigContainer.Instance.Query[typeof(T)]).Add(action);
         }
 
         /// <summary>

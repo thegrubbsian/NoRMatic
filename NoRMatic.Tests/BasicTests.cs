@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
 using NoRMatic.Tests.TestModel;
 using NUnit.Framework;
 
@@ -320,26 +322,6 @@ namespace NoRMatic.Tests {
             order.Save();
 
             Assert.AreEqual("accountA", order.AccountName);
-        }
-
-        [Test]
-        public void GivenAModelWithAnAbstractQueryBehavior_Find_ShouldRespectTheAbstractBehavior() {
-            
-            NoRMaticConfig.DropAbstractBehaviors();
-
-            NoRMaticConfig.AddQueryBehavior<IBoundByAccount>(x => x.AccountName == "accountA");
-
-            var orderA = new Order { AccountName = "accountA", Sku = "RF94W92", Quantity = 3 };
-            var orderB = new Order { AccountName = "accountA", Sku = "399RJE2E", Quantity = 8 };
-            var orderC = new Order { AccountName = "accountB", Sku = "39FSWJW", Quantity = 5 };
-
-            orderA.Save();
-            orderB.Save();
-            orderC.Save();
-
-            var fetched = Order.Find(x => x.Quantity > 0);
-
-            Assert.IsTrue(!fetched.Any(x => x.AccountName != "accountA"));
         }
     }
 }
