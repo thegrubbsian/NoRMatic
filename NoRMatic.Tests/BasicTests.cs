@@ -8,6 +8,16 @@ namespace NoRMatic.Tests {
     public class BasicTests {
 
         [Test]
+        public void GivenANonExistantCollection_All_ShouldReturnAnEmptyList() {
+            
+            Patient.DeleteAll();
+
+            var patients = Patient.All().ToList();
+
+            Assert.AreEqual(0, patients.Count);
+        }
+
+        [Test]
         public void NoRMaticModelSave_ShouldPersistTheObject() {
 
             Patient.DropBehaviors();

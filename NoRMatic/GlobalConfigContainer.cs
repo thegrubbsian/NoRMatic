@@ -21,8 +21,14 @@ namespace NoRMatic {
         private Func<string> _connectionStringProvider;
         public Func<string> ConnectionStringProvider {
             get {
-                return _connectionStringProvider ??
-                       (_connectionStringProvider = () => ConfigurationManager.ConnectionStrings["NoRMaticConnectionString"].ConnectionString);
+                if (_connectionStringProvider == null)
+                    _connectionStringProvider = () => {
+                        if (ConfigurationManager.ConnectionStrings["NoRMaticConnectionString"] == null)
+                            throw new ApplicationException("No connection string provider was defined, and the default 'NoRMaticConnectionString' was not present in the configuration file.");
+                        return ConfigurationManager.ConnectionStrings["NoRMaticConnectionString"].ConnectionString;
+                    };
+
+                return _connectionStringProvider;
             }
             set { _connectionStringProvider = value; }
         }
