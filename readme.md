@@ -27,6 +27,7 @@ Most of what you'll need to use NoRMatic is provided in the NoRMaticModel<T> bas
 
 * All() [IEnumerable<T>] - Returns all documents from the collection excluding versions or soft deleted documents
 * Find(Expression<Func<T, bool>>) [IQueryable<T>] - Finds a document via the NoRM LINQ provider
+* FindOne(Expression<Func<T, bool>>) [T] - Finds a single document via the NoRM LINQ provider
 * GetById(ObjectId) [T] - Finds a single document by its Id which includes soft deleted items
 * DeleteAll() [void] - Drops the entire collection regardless of EnableSoftDelete
 * GetMongoCollection() [IMongoCollection<T>] - Returns a raw hook to the NoRM collection
@@ -145,6 +146,23 @@ In the example below, any calls to Delete() will execute the anonymous function 
 	NoRMaticModel<T>.AddAfterDeleteBehavior(Action<T>) [void]
 
 AfterDelete behaviors are simply actions that are executed immediately after any call to Delete().
+
+### Abstract Behaviors
+
+In addition to the behaviors that can be added to individual model types, the before/after save and before/after delete behaviors can be added to abstract types or interfaces and will affect any NoRMaticModel<T> entities that inherit from those abstract types.  For example:
+	
+	public interface IMustHaveAnAccountId {
+		int AccountId { get; set;}
+	}
+	
+	public class Customer : NoRMaticModel<Customer>, IMustHaveAnAccountId {
+		public int AccountId { get; set; }
+		...
+	}
+	
+	NoRMaticConfig.AddBeforeSaveAbstractBehavior<IMustHaveAnAccountId>(x => { x.AccountId = 123; return true; });
+	
+In the above example, the abstract behavior will run when Save() is called for any type which inherits NoRMaticModel<T> and implement the IMustHaveAnAccountId interface.  Note, abstract behaviors are implemented using Func<dynamic,bool> or Action<dynamic> which means that when setting up the configuration you will not have intellisense for the properties of the target type.
 
 ## Configuration/Initialization
 Configuration for NoRMatic is done via the static methods of NoRMaticModel<T> and NoRMaticConfig.  Executing the configurations is a simple matter of creating a class which implements INoRMaticInitializer.  The Setup() methods of any class implementing this interface will be executed when the NoRMaticConfig.Initialize() method is called, in a web application you might place the call to Initialize() in your Global.asax Application_Start event which would setup NoRMatic for the session.  For example:
