@@ -4,7 +4,7 @@
 NoRMatic is a wrapper/extender for the excellent [NoRM](http://www.normproject.com/) library (thanks to Andrew Theken) for interacting with MongoDB in .NET.  NoRM exposes a complete LINQ provider over MongoDB collections along with helpers for index and collection management as well as strongly typed document mapping.  NoRMatic applies an easy-to-use API in an ActiveRecord style using NoRM as it's underlying data access layer.  NoRMatic also provides behavior hooks for before and after save, before and after delete, as well as soft deleting, versioning, and basic auditing.
 
 ## Model Basics (NoRMaticModel<T>)
-Most of what you'll need to use NoRMatic is provided in the <code>NoRMaticModel<T></code> base class.  Any class inheriting from this will be able to take advantage of the following members:
+Most of what you'll need to use NoRMatic is provided in the NoRMaticModel<T> base class.  Any class inheriting from this will be able to take advantage of the following members:
 
 ### Instance Members
 
@@ -182,6 +182,8 @@ Configuration for NoRMatic is done via the static methods of NoRMaticModel<T> an
 			
 			Order.EnableSoftDelete();
 			Order.EnableVersioning();
+			
+			Order.AddIndex(x => x.ProductId);
 		}
 	}
 	
@@ -191,7 +193,18 @@ Configuration for NoRMatic is done via the static methods of NoRMaticModel<T> an
 	}
 	
 ### Connection String Provider
+If you do not configure a connection string provider, NoRMatic will look for a connection string called 'NoRMaticConnectionString'.  The connection string must be a valid MongoDB connection string such as:
 
+	mongodb://<servername>/<databasename>?strict=true
+	
+If you need to confiture another mechanism for retrieving the connection string you can set a global connection string provider function, or set one per model, or both.  The model level connection string provider will override any global providers set.  Connection string providers, like behaviors, are simply expressed as anonymous functions whcih return strings.  For example:
+
+	NoRMaticConfig.SetConnectionStringProvider(() => ConfigurationManager.AppSettings["SomeOtherConnectionString"]);
+	
+	Product.SetConnectionStringProvider(() => "mongodb://localhost/ProductCatalog");
+	Customer.SetConnectionStringProvider(() => string.Format("mongodb://localhost/{0}", Session["AccountName"]));
+	
+In these examples you can see how it's easy to substitue the default expected connection string name with a provider that will return a runtime connection string based on your applications context.
 
 ### Current User Provider
 
