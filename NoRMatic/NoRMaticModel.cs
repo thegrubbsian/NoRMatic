@@ -19,8 +19,8 @@ namespace NoRMatic {
             get { return ModelConfigContainer<T>.Instance; }
         }
 
-        public ObjectId Id { get; internal set; }
-        public DateTime DateUpdated { get; internal set; }
+        public ObjectId Id { get; set; }
+        public DateTime DateUpdated { get; set; }
 
         /// <summary>
         /// Returns any validation errors for the current state of the entity.  Validation uses the System.ComponentModel.DataAnnotations

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace NoRMatic {
 
@@ -39,6 +40,15 @@ namespace NoRMatic {
                 list.AddRange(item.Value);
 
             return list;
+        }
+
+        public static List<Type> GetTypesAssignableFrom(this Assembly[] @this, Type type) {
+
+            var types = new List<Type>();
+            foreach (var assembly in @this) {
+                try { types.AddRange(assembly.GetTypes().Where(type.IsAssignableFrom)); } catch { }
+            }
+            return types;
         }
     }
 }

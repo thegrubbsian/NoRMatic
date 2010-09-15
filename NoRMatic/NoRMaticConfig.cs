@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
+using System.Reflection;
 
 namespace NoRMatic {
 
@@ -11,11 +12,9 @@ namespace NoRMatic {
         }
 
         public static void Initialize() {
-            
-            var types = AppDomain.CurrentDomain.GetAssemblies().ToList()
-                .SelectMany(s => s.GetTypes())
-                .Where(x => typeof(INoRMaticInitializer).IsAssignableFrom(x) && 
-                    x != typeof(INoRMaticInitializer));
+
+            var types = AppDomain.CurrentDomain.GetAssemblies()
+                .GetTypesAssignableFrom(typeof (INoRMaticInitializer));
 
             foreach (var type in types) {
                 try {

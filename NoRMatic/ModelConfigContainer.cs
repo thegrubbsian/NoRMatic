@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace NoRMatic {
 
-    internal sealed class ModelConfigContainer<T> {
+    internal sealed class ModelConfigContainer<T> where T : NoRMaticModel<T> {
 
         class Nested {
             static Nested() { } // Constructor so compiler doesn't mark beforefieldinit

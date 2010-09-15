@@ -4,7 +4,7 @@
 NoRMatic is a wrapper/extender for the excellent [NoRM](http://www.normproject.com/) library (thanks to Andrew Theken) for interacting with MongoDB in .NET.  NoRM exposes a complete LINQ provider over MongoDB collections along with helpers for index and collection management as well as strongly typed document mapping.  NoRMatic applies an easy-to-use API in an ActiveRecord style using NoRM as it's underlying data access layer.  NoRMatic also provides behavior hooks for before and after save, before and after delete, as well as soft deleting, versioning, and basic auditing.
 
 ## Model Basics (NoRMaticModel<T>)
-Most of what you'll need to use NoRMatic is provided in the NoRMaticModel<T> base class.  Any class inheriting from this will be able to take advantage of the following members:
+Most of what you'll need to use NoRMatic is provided in the <pre>NoRMaticModel<T></pre> base class.  Any class inheriting from this will be able to take advantage of the following members:
 
 ### Instance Members
 
@@ -28,6 +28,7 @@ Most of what you'll need to use NoRMatic is provided in the NoRMaticModel<T> bas
 * All() [IEnumerable<T>] - Returns all documents from the collection excluding versions or soft deleted documents
 * Find(Expression<Func<T, bool>>) [IQueryable<T>] - Finds a document via the NoRM LINQ provider
 * FindOne(Expression<Func<T, bool>>) [T] - Finds a single document via the NoRM LINQ provider
+* Exists(Expression<Func<T, bool>>) [bool] - Returns a boolean indicating whether a matching document exists
 * GetById(ObjectId) [T] - Finds a single document by its Id which includes soft deleted items
 * DeleteAll() [void] - Drops the entire collection regardless of EnableSoftDelete
 * GetMongoCollection() [IMongoCollection<T>] - Returns a raw hook to the NoRM collection
