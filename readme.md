@@ -193,9 +193,11 @@ Configuration for NoRMatic is done via the static methods of NoRMaticModel<T> an
 	}
 	
 ### Connection String Provider
-If you do not configure a connection string provider, NoRMatic will look for a connection string called 'NoRMaticConnectionString'.  The connection string must be a valid MongoDB connection string such as:
+If you do not configure a connection string provider, NoRMatic will look for a connection string called 'NoRMaticConnectionString' in your web or app config file.  For example:
 
-	mongodb://<servername>/<databasename>?strict=true
+	<connectionStrings>
+        <add name="NoRMaticConnectionString" connectionString="mongodb://localhost/NoRMaticWebSample?strict=true" />
+    </connectionStrings>
 	
 If you need to confiture another mechanism for retrieving the connection string you can set a global connection string provider function, or set one per model, or both.  The model level connection string provider will override any global providers set.  Connection string providers, like behaviors, are simply expressed as anonymous functions whcih return strings.  For example:
 
@@ -207,7 +209,12 @@ If you need to confiture another mechanism for retrieving the connection string 
 In these examples you can see how it's easy to substitue the default expected connection string name with a provider that will return a runtime connection string based on your applications context.
 
 ### Current User Provider
+Many times, it's helpful to know what user initiated a change to a document in your database.  In order to make updating this automatic when a document is saved, you can enable user auditing for a model.  Beyond just enabling this behavior, you'll need to let NoRMatic know how to get the current user at runtime.  Setting this up is done via (guess what) an anonymous function:
 
+	NoRMaticConfig.SetCurrentUserProvider(() => HttpContext.Current.User.Identity.Name);
+	CustomerProfile.EnableUserAuditing();
+	
+The above configuration will cause the 'UpdatedBy' property of all CustomerProfile objects to be set to the currently authenticated user in a web application.
 
 ### Indexing
 
