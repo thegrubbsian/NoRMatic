@@ -192,6 +192,13 @@ Configuration for NoRMatic is done via the static methods of NoRMaticModel<T> an
 		NoRMaticConfig.Initialize();
 	}
 	
+Behaviors can be dropped at either the abstract or model levels:
+
+	NoRMaticConfig.DropAbstractBehaviors();
+	Order.DropBehaviors();
+	
+NOTE: When dropping behaviors on NoRMaticModel entities, versioning, soft delete, and user auditing will be turned off.
+	
 ### Connection String Provider
 If you do not configure a connection string provider, NoRMatic will look for a connection string called 'NoRMaticConnectionString' in your web or app config file.  For example:
 
