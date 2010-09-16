@@ -34,6 +34,10 @@ namespace NoRMatic {
             GetMongoCollection().CreateIndex(indexKey, indexName, isUnique, direction);
         }
 
+        /// <summary>
+        /// Sets a model specific connection string provider.  This provider will override any global provider
+        /// that is registered through NoRMaticConfig.SetConnectionStringProvider().
+        /// </summary>
         public static void SetConnectionStringProvider(Func<string> provider) {
             ModelConfig.ConnectionStringProvider = provider;
         }

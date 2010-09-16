@@ -8,15 +8,36 @@ namespace NoRMatic {
     public abstract partial class NoRMaticModel<T> where T : NoRMaticModel<T> {
 
         // Soft Delete
+        /// <summary>
+        /// This flag is set when a model is deleted for which EnableSoftDelete has been set.
+        /// </summary>
         public bool IsDeleted { get; internal set; }
+
+        /// <summary>
+        /// This is the date the model was deleted when EnableSoftDelete has been set.  If EnableSoftDelete
+        /// is not set this value will be null.
+        /// </summary>
         public DateTime DateDeleted { get; internal set; }
 
         // Versioning
+        /// <summary>
+        /// This flag is set for documents in the collection which are previous versions of a source
+        /// document.
+        /// </summary>
         public bool IsVersion { get; internal set; }
-        public DateTime DateVersioned { get; internal set; }
+        
+        /// <summary>
+        /// For models which have EnableVersioning set, this is the Id of the source document.  If 
+        /// EnableVersioning is not set this value will be null.
+        /// </summary>
         public ObjectId VersionOfId { get; internal set; }
 
         // User Auditing
+        /// <summary>
+        /// If EnableUserAuditing is set for the model, this will be the value supplied by
+        /// the CurrentUserProvider when Save() is called on the model.  If EnableUserAuditing is not set
+        /// this value will be null.
+        /// </summary>
         public string UpdatedBy { get; internal set; }
 
         /// <summary>
@@ -92,14 +113,23 @@ namespace NoRMatic {
             ModelConfig.EnableUserAuditing = true;
         }
 
+        /// <summary>
+        /// Disables the soft delete behavior of the model.
+        /// </summary>
         public static void DisableSoftDelete() {
             ModelConfig.EnableSoftDelete = false;
         }
 
+        /// <summary>
+        /// Disables the versioning behavior of the model.
+        /// </summary>
         public static void DisableVersioning() {
             ModelConfig.EnableVersioning = false;
         }
 
+        /// <summary>
+        /// Disables the user auditing behavior of the model.
+        /// </summary>
         public static void DisableUserAuditing() {
             ModelConfig.EnableUserAuditing = false;
         }

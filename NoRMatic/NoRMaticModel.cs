@@ -8,6 +8,9 @@ using Norm.Attributes;
 
 namespace NoRMatic {
 
+    /// <summary>
+    /// This is the base class for all NoRMatic models.
+    /// </summary>
     public abstract partial class NoRMaticModel<T> where T : NoRMaticModel<T> {
 
         private static GlobalConfigContainer GlobalConfig {
@@ -18,7 +21,17 @@ namespace NoRMatic {
             get { return ModelConfigContainer<T>.Instance; }
         }
 
+        /// <summary>
+        /// Gets or sets the identifier for the model.  This will be auto-assigned when Save() is called on a
+        /// new model.
+        /// </summary>
         public ObjectId Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last updated date for the model.  Thsi will be auto-assigned when Save() is called
+        /// on the model.  If EnableVersioning is set, this will also indicate the date the version was made for
+        /// version documents.
+        /// </summary>
         public DateTime DateUpdated { get; set; }
 
         /// <summary>
@@ -150,7 +163,7 @@ namespace NoRMatic {
         /// </summary>
         public virtual IEnumerable<T> GetVersions() {
             return GetMongoCollection().Find(new { IsVersion = true, VersionOfId = Id })
-                .OrderByDescending(x => x.DateVersioned);
+                .OrderByDescending(x => x.DateUpdated);
         }
 
         private List<ValidationResult> Validate() {
@@ -168,7 +181,6 @@ namespace NoRMatic {
         private void SaveVersion() {
             var clone = Clone();
             clone.IsVersion = true;
-            clone.DateVersioned = DateTime.Now;
             clone.VersionOfId = Id;
             GetMongoCollection().Save(clone);
         }

@@ -6,8 +6,7 @@ using System.Reflection;
 
 namespace NoRMatic {
 
-    
-    public static class Extensions {
+    internal static class Extensions {
 
         public static List<Expression<Func<T, bool>>> GetByType<T>(
             this Dictionary<Type, object> @this) {

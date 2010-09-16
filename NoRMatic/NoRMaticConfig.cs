@@ -5,12 +5,19 @@ using System.Reflection;
 
 namespace NoRMatic {
 
+    /// <summary>
+    /// This class contains global configuration for the NoRMatic library at runtime.
+    /// </summary>
     public static class NoRMaticConfig {
 
-        public static string ConnectionString {
+        internal static string ConnectionString {
             get { return GlobalConfigContainer.Instance.ConnectionStringProvider(); }
         }
 
+        /// <summary>
+        /// Calling this method will execute the Setup() method of any class in the AppDomain which
+        /// implements the INoRMaticInitializer interface.  This shoudl be called during application startup.
+        /// </summary>
         public static void Initialize() {
 
             var types = AppDomain.CurrentDomain.GetAssemblies()
