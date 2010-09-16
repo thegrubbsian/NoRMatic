@@ -224,4 +224,13 @@ Many times, it's helpful to know what user initiated a change to a document in y
 The above configuration will cause the 'UpdatedBy' property of all CustomerProfile objects to be set to the currently authenticated user in a web application.
 
 ### Indexing
-
+Indexes can easily be created through the AddIndex() method of NoRMaticModel<T>.  This is basically just a proxy method for the NoRM library CreateIndex() method.  Some examples:
+	
+	// Index Order documents by the OrderDate property with generated name, non-unique, and ascending order
+	Order.AddIndex(x => x.OrderDate);
+	
+	// The same defaults as above but with a multi-key index
+	Order.AddIndex(x => new { x.OrderDate, x.Sku });
+	
+	// Optional parameters are available to override any of the defaults
+	Order.AddIndex(x => x.OrderDate, indexName: "OrdersByDate", isUnique: true, direction: IndexOption.Ascending);
