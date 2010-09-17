@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Norm;
 using NUnit.Framework;
 using TestModel;
 
@@ -9,7 +10,7 @@ namespace NoRMatic.Tests {
 
         [Test]
         public void GivenANonExistantCollection_All_ShouldReturnAnEmptyList() {
-            
+
             Patient.DeleteAll();
 
             var patients = Patient.All().ToList();
@@ -321,7 +322,7 @@ namespace NoRMatic.Tests {
 
         [Test]
         public void GivenAModelWithAnAbstractBehavior_Save_ShouldApplyTheAbstractBehavior() {
-            
+
             NoRMaticConfig.DropAbstractBehaviors();
 
             NoRMaticConfig.AddBeforeSaveAbstractBehavior<IBoundByAccount>(x => { x.AccountName = "accountA"; return true; });
@@ -330,6 +331,70 @@ namespace NoRMatic.Tests {
             order.Save();
 
             Assert.AreEqual("accountA", order.AccountName);
+        }
+
+        [Test]
+        public void GivenAModelWithNoBehaviors_GetById_ShouldReturnTheCorrectDocument() {
+
+            Patient.DropBehaviors();
+            Patient.DeleteAll();
+
+            ObjectId lastId = null;
+
+            for (var i = 0; i < 20; i++) {
+                var patient = new Patient { FirstName = "Jim", LastName = "Bob", Age = 10 + i };
+                patient.Save();
+                if (i == 19)
+                    lastId = patient.Id;
+            }
+
+            var fetched = Patient.GetById(lastId);
+
+            Assert.AreEqual(lastId, fetched.Id);
+            Assert.AreEqual(29, fetched.Age);
+        }
+
+        [Test]
+        public void GivenAModelWithSoftDeleteAndVersioning_GetById_ShouldRespectTheBehaviors() {
+
+            Patient.DropBehaviors();
+            Patient.DeleteAll();
+
+            Patient.EnableSoftDelete();
+            Patient.EnableVersioning();
+
+            var patientA = new Patient { FirstName = "Jim", LastName = "Bob", Age = 10 };
+            var patientB = new Patient { FirstName = "Jim", LastName = "Bob", Age = 10 };
+            var patientC = new Patient { FirstName = "Jim", LastName = "Bob", Age = 10 };
+            var patientD = new Patient { FirstName = "Jim", LastName = "Bob", Age = 10 };
+            var patientE = new Patient { FirstName = "Jim", LastName = "Bob", Age = 10 };
+            var patientF = new Patient { FirstName = "Jim", LastName = "Bob", Age = 10 };
+            patientA.Save();
+            patientB.Save();
+            patientC.Save();
+            patientD.Save();
+            patientE.Save();
+            patientF.Save();
+
+            patientA.LastName = "Edwards";
+            patientA.Save();
+
+            patientB.FirstName = "Steve";
+            patientB.Save();
+
+            patientE.Delete();
+            patientF.Delete();
+
+            var fetchedA = Patient.GetById(patientA.Id);
+            var fetchedC = Patient.GetById(patientC.Id);
+            var fetchedF = Patient.GetById(patientF.Id);
+
+            Assert.AreEqual(fetchedA.Id, patientA.Id);
+            Assert.IsTrue(!fetchedA.IsVersion);
+
+            Assert.AreEqual(fetchedC.Id, patientC.Id);
+
+            Assert.IsNull(fetchedF);
         }
     }
 }

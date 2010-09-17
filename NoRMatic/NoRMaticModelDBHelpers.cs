@@ -17,8 +17,9 @@ namespace NoRMatic {
             var conString = ModelConfig.ConnectionStringProvider != null ?
                 ModelConfig.ConnectionStringProvider() : NoRMaticConfig.ConnectionString;
 
-            using (var db = Mongo.Create(conString))
+            using (var db = Mongo.Create(conString)) {
                 return db.GetCollection<T>();
+            }
         }
 
         /// <summary>

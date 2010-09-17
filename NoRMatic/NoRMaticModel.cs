@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Norm;
 using Norm.Attributes;
+using Norm.BSON;
 
 namespace NoRMatic {
 
@@ -91,9 +92,16 @@ namespace NoRMatic {
         public static T GetById(ObjectId id,
             bool includeDeleted = false, bool includeVersions = false) {
 
-            //return GetMongoCollection().FindOne(new {Id = id});
+            var expando = new Expando();
+            expando["_id"] = id;
 
-            return Find(x => x.Id == id, includeDeleted, includeVersions).SingleOrDefault();
+            if (ModelConfig.EnableSoftDelete && !includeDeleted)
+                expando["IsDeleted"] = false;
+
+            if (ModelConfig.EnableVersioning && !includeVersions)
+                expando["IsVersion"] = false;
+
+            return GetMongoCollection().FindOne(expando);
         }
 
         /// <summary>
@@ -117,7 +125,7 @@ namespace NoRMatic {
             if (ModelConfig.EnableVersioning && IsVersion) return;
 
             if (!DoBeforeBehaviors(
-                GlobalConfig.BeforeSave.GetByType(GetType()), 
+                GlobalConfig.BeforeSave.GetByType(GetType()),
                 ModelConfig.BeforeSave)) return;
 
             if (Validate().Count > 0) return;
@@ -132,7 +140,7 @@ namespace NoRMatic {
             if (ModelConfig.EnableVersioning) SaveVersion();
 
             DoAfterBehaviors(
-                GlobalConfig.AfterSave.GetByType(GetType()), 
+                GlobalConfig.AfterSave.GetByType(GetType()),
                 ModelConfig.AfterSave);
         }
 
@@ -143,7 +151,7 @@ namespace NoRMatic {
         public virtual void Delete() {
 
             if (!DoBeforeBehaviors(
-                GlobalConfig.BeforeDelete.GetByType(GetType()), 
+                GlobalConfig.BeforeDelete.GetByType(GetType()),
                 ModelConfig.BeforeDelete)) return;
 
             if (ModelConfig.EnableSoftDelete) {
