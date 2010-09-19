@@ -119,16 +119,16 @@ namespace NoRMatic {
         /// Creates or saves the entity to the database.  If the EnableVersioning behavior is set then a version
         /// will be created for each save.  NOTE: Versions are created regardless of whether changes exist or not.
         /// </summary>
-        public virtual void Save() {
+        public virtual T Save() {
 
-            if (ModelConfig.EnableSoftDelete && IsDeleted) return;
-            if (ModelConfig.EnableVersioning && IsVersion) return;
+            if (ModelConfig.EnableSoftDelete && IsDeleted) return (T)this;
+            if (ModelConfig.EnableVersioning && IsVersion) return (T)this;
 
             if (!DoBeforeBehaviors(
                 GlobalConfig.BeforeSave.GetByType(GetType()),
-                ModelConfig.BeforeSave)) return;
+                ModelConfig.BeforeSave)) return (T)this;
 
-            if (Validate().Count > 0) return;
+            if (Validate().Count > 0) return (T)this;
 
             DateUpdated = DateTime.Now;
 
@@ -142,6 +142,8 @@ namespace NoRMatic {
             DoAfterBehaviors(
                 GlobalConfig.AfterSave.GetByType(GetType()),
                 ModelConfig.AfterSave);
+
+            return (T)this;
         }
 
         /// <summary>
