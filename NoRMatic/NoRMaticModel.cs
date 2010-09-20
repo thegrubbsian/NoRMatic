@@ -46,10 +46,9 @@ namespace NoRMatic {
 
         /// <summary>
         /// Returns all instances of this type from the database but query behaviors are respected.  This method
-        /// will not return versions or soft deleted entities.
-        /// NOTE: Use Find() to return deleted or versioned items if the EnableSoftDelete or EnableVersioning behaviors are set.
+        /// will not return versions or soft deleted entities unless the related override argument is set to true.
         /// </summary>
-        public static IEnumerable<T> All() {
+        public static IEnumerable<T> All(bool includeDeleted = false, bool includeVersions = false) {
 
             if (ModelConfig.Query.Count == 0 && !ModelConfig.EnableSoftDelete)
                 return GetMongoCollection().Find();
@@ -57,11 +56,11 @@ namespace NoRMatic {
             var query = GetMongoCollection().AsQueryable();
             query = ModelConfig.Query.Aggregate(query, (c, b) => c.Where(b));
 
-            if (ModelConfig.EnableVersioning)
-                query = query.Where(x => !x.IsVersion);
-
-            if (ModelConfig.EnableSoftDelete)
+            if (ModelConfig.EnableSoftDelete && !includeDeleted)
                 query = query.Where(x => !x.IsDeleted);
+
+            if (ModelConfig.EnableVersioning && !includeVersions)
+                query = query.Where(x => !x.IsVersion);
 
             return query.ToList();
         }
