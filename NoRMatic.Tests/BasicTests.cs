@@ -2,6 +2,7 @@
 using Norm;
 using NUnit.Framework;
 using TestModel;
+using System.Collections.Generic;
 
 namespace NoRMatic.Tests {
 
@@ -395,6 +396,30 @@ namespace NoRMatic.Tests {
             Assert.AreEqual(fetchedC.Id, patientC.Id);
 
             Assert.IsNull(fetchedF);
+        }
+
+        [Test]
+        public void GivenAConfigurationWithALogListener_Find_ShouldWriteAppropriateLogMessages() {
+
+            Subscriber.DeleteAll();
+
+            var messages = new List<string>();
+
+            NoRMaticConfig.SetLogListener(messages.Add);
+
+            var subscriberA = new Subscriber {
+                FirstName = "James",
+                LastName = "Stimpleton",
+                Address = "100 Street Avenue",
+                City = "Citytown",
+                State = "ST",
+                Zip = "12345"
+            };
+            subscriberA.Save();
+
+            var fetched = Subscriber.Find(x => x.FirstName == "James");
+
+            Assert.AreEqual(2, messages.Count);
         }
     }
 }

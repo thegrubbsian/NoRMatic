@@ -1,4 +1,4 @@
-### Version 0.8.1
+### Version 0.8.2
 
 # NoRMatic
 NoRMatic is a wrapper/extender for the excellent [NoRM](http://www.normproject.com/) library (thanks to Andrew Theken) for interacting with MongoDB in .NET.  NoRM exposes a complete LINQ provider over MongoDB collections along with helpers for index and collection management as well as strongly typed document mapping.  NoRMatic applies an easy-to-use API in an ActiveRecord style using NoRM as it's underlying data access layer.  NoRMatic also provides behavior hooks for before and after save, before and after delete, as well as soft deleting, versioning, and basic auditing.
@@ -234,3 +234,11 @@ Indexes can easily be created through the AddIndex() method of NoRMaticModel<T>.
 	
 	// Optional parameters are available to override any of the defaults
 	Order.AddIndex(x => x.OrderDate, indexName: "OrdersByDate", isUnique: true, direction: IndexOption.Ascending);
+	
+### Log Listener
+By providing an anonymous function to the NoRMaticConfig.LogListener property, all database actions can be send to a logging provider.  For example:
+
+	var logger = new Logger();
+	NoRMaticConfig.LogListener = x => logger.Log(x);
+
+Queries logged in this manner will include the LINQ expression in string format.

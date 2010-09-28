@@ -51,6 +51,14 @@ namespace NoRMatic {
         }
 
         /// <summary>
+        /// If provided, this anonymous function will be called when any database operation occurs,
+        /// for queries the LINQ expression will be included.
+        /// </summary>
+        public static void SetLogListener(Action<string> listener) {
+            GlobalConfigContainer.Instance.LogListener = listener;
+        }
+
+        /// <summary>
         /// BeforeSaveBehaviors are functions called before any Save for entities implementing a given abstract marker.  If any of these
         /// functions return 'true' the save will NOT proceed.  This can be useful if there are pre-save validations or other checks
         /// that need to be made that may stop the save.

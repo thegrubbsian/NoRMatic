@@ -62,6 +62,8 @@ namespace NoRMatic {
             if (ModelConfig.EnableVersioning && !includeVersions)
                 query = query.Where(x => !x.IsVersion);
 
+            WriteToLog(string.Format("ALL -- {0}", query));
+
             return query.ToList();
         }
 
@@ -81,6 +83,8 @@ namespace NoRMatic {
 
             if (ModelConfig.EnableVersioning && !includeVersions)
                 query = query.Where(x => !x.IsVersion);
+
+            WriteToLog(string.Format("FIND -- {0}", query));
 
             return query;
         }
@@ -111,6 +115,7 @@ namespace NoRMatic {
             using (var db = Mongo.Create(NoRMaticConfig.ConnectionString)) {
                 // Try/Catch is to avoid error when DeleteAll() is called on a non-existant collection
                 try { db.Database.DropCollection(typeof(T).Name); } catch { }
+                WriteToLog(string.Format("DELETE ALL -- Type: {0}", typeof(T).Name));
             }
         }
 
@@ -142,6 +147,8 @@ namespace NoRMatic {
                 GlobalConfig.AfterSave.GetByType(GetType()),
                 ModelConfig.AfterSave);
 
+            WriteToLog(string.Format("SAVED -- Type: {0}, Id: {1}", typeof(T).Name, Id));
+
             return (T)this;
         }
 
@@ -160,6 +167,7 @@ namespace NoRMatic {
             } else {
                 if (ModelConfig.EnableVersioning) DeleteVersions();
                 GetMongoCollection().Delete((T)this);
+                WriteToLog(string.Format("DELETE -- Type: {0}, Id: {1}", typeof(T).Name, Id));
             }
 
             DoAfterBehaviors(
@@ -185,6 +193,7 @@ namespace NoRMatic {
             IsDeleted = true;
             DateDeleted = DateTime.Now;
             GetMongoCollection().Save((T)this);
+            WriteToLog(string.Format("SOFT DELETE -- Type: {0}, Id: {1}", typeof(T).Name, Id));
         }
 
         private void SaveVersion() {
@@ -192,6 +201,7 @@ namespace NoRMatic {
             clone.IsVersion = true;
             clone.VersionOfId = Id;
             GetMongoCollection().Save(clone);
+            WriteToLog(string.Format("VERSIONED -- Type: {0}, Source Id: {1}, Version Id: {2}", typeof(T).Name, Id, clone.Id));
         }
 
         private T Clone() {
@@ -222,6 +232,11 @@ namespace NoRMatic {
 
             global.ForEach(x => x(this));
             model.ForEach(x => x((T)this));
+        }
+
+        private static void WriteToLog(string message) {
+            if (GlobalConfig.LogListener != null)
+                GlobalConfig.LogListener(message);
         }
     }
 }

@@ -15,8 +15,8 @@ namespace NoRMatic {
             get { return Nested.instance; }
         }
 
-        public string ConnectionStringName { get; set; }
         public Func<string> CurrentUserProvider { get; set; }
+        public Action<string> LogListener { get; set; }
 
         private Func<string> _connectionStringProvider;
         public Func<string> ConnectionStringProvider {
