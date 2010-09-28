@@ -239,6 +239,6 @@ Indexes can easily be created through the AddIndex() method of NoRMaticModel<T>.
 By providing an anonymous function to the NoRMaticConfig.LogListener property, all database actions can be send to a logging provider.  For example:
 
 	var logger = new Logger();
-	NoRMaticConfig.LogListener = x => logger.Log(x);
+	NoRMaticConfig.SetLogListener(x => logger.Log(x));
 
 Queries logged in this manner will include the LINQ expression in string format.
