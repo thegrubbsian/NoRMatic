@@ -1,4 +1,4 @@
-### Version 0.8.2
+### Version 0.8.3
 
 # NoRMatic
 NoRMatic is a wrapper/extender for the excellent [NoRM](http://www.normproject.com/) library (thanks to Andrew Theken) for interacting with MongoDB in .NET.  NoRM exposes a complete LINQ provider over MongoDB collections along with helpers for index and collection management as well as strongly typed document mapping.  NoRMatic applies an easy-to-use API in an ActiveRecord style using NoRM as it's underlying data access layer.  NoRMatic also provides behavior hooks for before and after save, before and after delete, as well as soft deleting, versioning, and basic auditing.
@@ -22,6 +22,7 @@ Most of what you'll need to use NoRMatic is provided in the NoRMaticModel<T> bas
 * Save() [T] - Persists the document and creates versions if EnableVersioning is set.  Save() returns the entity itself which allows for a small chaining convenience when creating new entities.
 * Delete() [void] - Deletes the document or "soft deletes" it if EnableSoftDelete is set
 * GetVersions() [List<T>] - Returns a list of versions for the document if EnableVersioning is set
+* GetRef<TRef> [TRef] - Fetches the value of a DbReference property from the database using the reference type's connection string provider if supplied.
 
 ### Static Methods
 
