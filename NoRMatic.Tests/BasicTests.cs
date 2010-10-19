@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Norm;
+using Norm.BSON.DbTypes;
 using NUnit.Framework;
 using TestModel;
 using System.Collections.Generic;
@@ -8,6 +9,17 @@ namespace NoRMatic.Tests {
 
     [TestFixture]
     public class BasicTests {
+
+        [SetUp]
+        public void DropCollections() {
+            Customer.DeleteAll();
+            MedicalRecord.DeleteAll();
+            Order.DeleteAll();
+            Patient.DeleteAll();
+            Product.DeleteAll();
+            Subscriber.DeleteAll();
+            Supplier.DeleteAll();
+        }
 
         [Test]
         public void GivenANonExistantCollection_All_ShouldReturnAnEmptyList() {
@@ -420,6 +432,25 @@ namespace NoRMatic.Tests {
             var fetched = Subscriber.Find(x => x.FirstName == "James");
 
             Assert.AreEqual(2, messages.Count);
+        }
+
+        [Test]
+        public void GivenAModelWithADbReferenceProperty_FetchRef_ShouldReturnTheCorrectEntity() {
+
+            var supplier = new Supplier { Name = "Acme" };
+            supplier.Save();
+
+            var product = new Product {
+                Name = "Hammer",
+                Price = "10",
+                Supplier = new DbReference<Supplier>(supplier.Id)
+            };
+            product.Save();
+
+            var fetchedRef = product.GetRef(x => x.Supplier);
+
+            Assert.IsNotNull(fetchedRef);
+            Assert.AreEqual(fetchedRef.Name, supplier.Name);
         }
     }
 }

@@ -22,6 +22,17 @@ namespace NoRMatic {
             }
         }
 
+        private static IMongoCollection<TX> GetMongoCollection<TX>() {
+
+            // TODO: This really needs to use the ModelConfig of TX not T
+            var conString = ModelConfig.ConnectionStringProvider != null ?
+                ModelConfig.ConnectionStringProvider() : NoRMaticConfig.ConnectionString;
+
+            using (var db = Mongo.Create(conString)) {
+                return db.GetCollection<TX>();
+            }
+        }
+
         /// <summary>
         /// Creates an index for the collection of the given type.  Optional parameters allow for specifying a name for the
         /// index, setting the index as unique, and dictating the index ordering.

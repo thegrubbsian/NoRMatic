@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using Norm;
 using Norm.Attributes;
 using Norm.BSON;
+using Norm.BSON.DbTypes;
 
 namespace NoRMatic {
 
@@ -42,69 +43,6 @@ namespace NoRMatic {
         [MongoIgnore]
         public List<ValidationResult> Errors {
             get { return Validate(); }
-        }
-
-        /// <summary>
-        /// Returns all instances of this type from the database but query behaviors are respected.  This method
-        /// will not return versions or soft deleted entities unless the related override argument is set to true.
-        /// </summary>
-        public static IEnumerable<T> All(bool includeDeleted = false, bool includeVersions = false) {
-
-            if (ModelConfig.Query.Count == 0 && !ModelConfig.EnableSoftDelete)
-                return GetMongoCollection().Find();
-
-            var query = GetMongoCollection().AsQueryable();
-            query = ModelConfig.Query.Aggregate(query, (c, b) => c.Where(b));
-
-            if (ModelConfig.EnableSoftDelete && !includeDeleted)
-                query = query.Where(x => !x.IsDeleted);
-
-            if (ModelConfig.EnableVersioning && !includeVersions)
-                query = query.Where(x => !x.IsVersion);
-
-            WriteToLog(string.Format("ALL -- {0}", query));
-
-            return query.ToList();
-        }
-
-        /// <summary>
-        /// Returns an enumerable list of entities matching the given expression.  If there are any registered query behaviors
-        /// for this type they will become constraints on this query.  By default, Find() will not return versions or soft deleted
-        /// entities, this behavior can be overridden by passing true to the 'includeDeleted' or 'includeVersions' arguments.
-        /// </summary>
-        public static IQueryable<T> Find(Expression<Func<T, bool>> expression,
-            bool includeDeleted = false, bool includeVersions = false) {
-
-            var query = GetMongoCollection().AsQueryable().Where(expression);
-            query = ModelConfig.Query.Aggregate(query, (c, b) => c.Where(b));
-
-            if (ModelConfig.EnableSoftDelete && !includeDeleted)
-                query = query.Where(x => !x.IsDeleted);
-
-            if (ModelConfig.EnableVersioning && !includeVersions)
-                query = query.Where(x => !x.IsVersion);
-
-            WriteToLog(string.Format("FIND -- {0}", query));
-
-            return query;
-        }
-
-        /// <summary>
-        /// Returns a single entity by it's Id from the database.
-        /// </summary>
-        public static T GetById(ObjectId id,
-            bool includeDeleted = false, bool includeVersions = false) {
-
-            var expando = new Expando();
-            expando["_id"] = id;
-
-            if (ModelConfig.EnableSoftDelete && !includeDeleted)
-                expando["IsDeleted"] = false;
-
-            if (ModelConfig.EnableVersioning && !includeVersions)
-                expando["IsVersion"] = false;
-
-            return GetMongoCollection().FindOne(expando);
         }
 
         /// <summary>
@@ -173,6 +111,17 @@ namespace NoRMatic {
             DoAfterBehaviors(
                 GlobalConfig.AfterDelete.GetByType(GetType()),
                 ModelConfig.AfterDelete);
+        }
+
+        /// <summary>
+        /// Retrieves the value of a DbReference from the database.  NOTE: The reference type's connection string
+        /// provider will be used, not the current types provider.
+        /// </summary>
+        public TRef GetRef<TRef>(Func<T, DbReference<TRef>> refProperty) 
+            where TRef : NoRMaticModel<TRef>, new() {
+
+            var dbRef = refProperty((T)this);
+            return GetMongoCollection<TRef>().FindOne(new { _id = dbRef.Id });
         }
 
         /// <summary>
