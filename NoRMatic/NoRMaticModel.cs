@@ -50,7 +50,11 @@ namespace NoRMatic {
         /// called DeleteAll() will permanently remove all documents from the collection.
         /// </summary>
         public static void DeleteAll() {
-            using (var db = Mongo.Create(NoRMaticConfig.ConnectionString)) {
+
+            var connectionString = ModelConfig.ConnectionStringProvider != null ?
+                ModelConfig.ConnectionStringProvider() : NoRMaticConfig.ConnectionString;
+
+            using (var db = Mongo.Create(connectionString)) {
                 // Try/Catch is to avoid error when DeleteAll() is called on a non-existant collection
                 try { db.Database.DropCollection(typeof(T).Name); } catch { }
                 WriteToLog(string.Format("DELETE ALL -- Type: {0}", typeof(T).Name));

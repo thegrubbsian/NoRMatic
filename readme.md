@@ -22,7 +22,7 @@ Most of what you'll need to use NoRMatic is provided in the NoRMaticModel<T> bas
 * Save() [T] - Persists the document and creates versions if EnableVersioning is set.  Save() returns the entity itself which allows for a small chaining convenience when creating new entities.
 * Delete() [void] - Deletes the document or "soft deletes" it if EnableSoftDelete is set
 * GetVersions() [List<T>] - Returns a list of versions for the document if EnableVersioning is set
-* GetRef<TRef> [TRef] - Fetches the value of a DbReference property from the database using the reference type's connection string provider if supplied.
+* GetRef()<TRef> [TRef] - Fetches the value of a DbReference property from the database using the reference type's connection string provider if supplied.
 
 ### Static Methods
 
