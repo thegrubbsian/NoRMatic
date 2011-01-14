@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConnectionPool.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GlobalConfigContainer.cs" />
     <Compile Include="INoRMaticInitializer.cs" />

@@ -14,12 +14,9 @@ namespace NoRMatic {
         /// </summary>
         public static IMongoCollection<T> GetMongoCollection() {
 
-            var conString = ModelConfig.ConnectionStringProvider != null ?
-                ModelConfig.ConnectionStringProvider() : NoRMaticConfig.ConnectionString;
-
-            using (var db = Mongo.Create(conString)) {
-                return db.GetCollection<T>();
-            }
+            var pool = ConnectionPool<T>.Instance;
+            var database = new MongoDatabase(pool.DatabaseName, pool.GetConnection());
+            return database.GetCollection<T>();
         }
 
         private static IMongoCollection<TX> GetMongoCollection<TX>() {

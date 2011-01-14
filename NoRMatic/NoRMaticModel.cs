@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Linq.Expressions;
 using Norm;
 using Norm.Attributes;
-using Norm.BSON;
 using Norm.BSON.DbTypes;
 
 namespace NoRMatic {
@@ -15,11 +13,11 @@ namespace NoRMatic {
     /// </summary>
     public abstract partial class NoRMaticModel<T> where T : NoRMaticModel<T> {
 
-        private static GlobalConfigContainer GlobalConfig {
+        internal static GlobalConfigContainer GlobalConfig {
             get { return GlobalConfigContainer.Instance; }
         }
 
-        private static ModelConfigContainer<T> ModelConfig {
+        internal static ModelConfigContainer<T> ModelConfig {
             get { return ModelConfigContainer<T>.Instance; }
         }
 
