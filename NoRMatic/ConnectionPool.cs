@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using Norm;
 
 namespace NoRMatic {
@@ -15,12 +16,12 @@ namespace NoRMatic {
             get { return Nested.instance; }
         }
 
-        private const int FreeConnectionsStandingCount = 3;
-        private const int MaxTimeToLive = 300;
+        private const int MaxFreeConnections = 5;
+        private const int MinTimeToLive = 100;
 
-        private readonly NormalConnectionProvider Provider;
-        private readonly Stack<IConnection> FreeConnections;
-        private readonly List<KeyValuePair<IConnection, long>> UsedConnections;
+        private readonly NormalConnectionProvider _provider;
+        private readonly Stack<IConnection> _freeConnections;
+        private readonly List<KeyValuePair<IConnection, long>> _usedConnections;
 
         private static string ConnectionString {
             get { 
@@ -30,58 +31,74 @@ namespace NoRMatic {
         }
 
         public string DatabaseName {
-            get { return Provider.ConnectionString.Database; }
+            get { return _provider.ConnectionString.Database; }
         }
 
         public ConnectionPool() {
 
             var builder = ConnectionStringBuilder.Create(ConnectionString);
-            Provider = new NormalConnectionProvider(builder);
+            _provider = new NormalConnectionProvider(builder);
 
-            FreeConnections = new Stack<IConnection>();
-            UsedConnections = new List<KeyValuePair<IConnection, long>>();
+            _freeConnections = new Stack<IConnection>();
+            _usedConnections = new List<KeyValuePair<IConnection, long>>();
 
-            CreateBatchOfConnections();
+            _freeConnections.Push(_provider.Open(string.Empty));
         }
 
         public IConnection GetConnection() {
 
-            if (FreeConnections.Count == 0 || FreeConnections.Count > FreeConnectionsStandingCount) {
+            if (_freeConnections.Count == 0 || _freeConnections.Count > MaxFreeConnections) {
                 Prune();
-                if (FreeConnections.Count == 0) {
-                    CreateBatchOfConnections();
+                if (_freeConnections.Count == 0) {
+                    _freeConnections.Push(_provider.Open(string.Empty));
                 }
             }
 
-            var connection = FreeConnections.Pop();
-            UsedConnections.Add(new KeyValuePair<IConnection, long>(connection, DateTime.Now.Ticks));
+            var connection = _freeConnections.Pop();
+            _usedConnections.Add(new KeyValuePair<IConnection, long>(connection, DateTime.Now.Ticks));
             return connection;
         }
 
         private void Prune() {
-            for (var i = 0; i < UsedConnections.Count; i++) {
-                if ((DateTime.Now.Ticks - UsedConnections[i].Value) <= (MaxTimeToLive * 10000)) continue;
-                ReclaimUsedConnectionToPool(UsedConnections[i]);
+            for (var i = 0; i < _usedConnections.Count; i++) {
+                var ticksToLive = MinTimeToLive * 10000;
+                var lifetime = DateTime.Now.Ticks - _usedConnections[i].Value;
+                if (_usedConnections[i].Key.GetStream().DataAvailable || lifetime <= ticksToLive) continue;
+                ReclaimUsedConnectionToPool(_usedConnections[i]);
             }
             ReduceFreeConnectionsToBaseline();
         }
 
         private void ReduceFreeConnectionsToBaseline() {
-            while (FreeConnections.Count > FreeConnectionsStandingCount) {
-                var connection = FreeConnections.Pop();
-                connection.Dispose();
+            while (_freeConnections.Count > MaxFreeConnections) {
+                var connection = _freeConnections.Pop();
+                DestroyConnection(connection);
             }
         }
 
-        private void ReclaimUsedConnectionToPool(KeyValuePair<IConnection, long> usedItem) {
-            UsedConnections.Remove(usedItem);
-            FreeConnections.Push(usedItem.Key);
+        private void ReclaimUsedConnectionToPool(KeyValuePair<IConnection, long> connectionItem) {
+            _usedConnections.Remove(connectionItem);
+
+            if (connectionItem.Key.IsInvalid || !connectionItem.Key.IsConnected) {
+                DestroyConnection(connectionItem.Key);
+                return;
+            }
+
+            ResetStream(connectionItem.Key.GetStream());
+            _freeConnections.Push(connectionItem.Key);
         }
 
-        private void CreateBatchOfConnections() {
-            for (var i = 0; i < FreeConnectionsStandingCount; i++) {
-                FreeConnections.Push(Provider.Open(string.Empty));
-            }
+        private static void ResetStream(NetworkStream stream) {
+            stream.Flush();
+            if (!stream.DataAvailable) return;
+            var toRead = Convert.ToInt32(stream.Length - stream.Position);
+            var offset = Convert.ToInt32(stream.Position);
+            stream.Read(new byte[toRead], offset, toRead);
+        }
+
+        private static void DestroyConnection(IConnection connectionn) {
+            connectionn.GetStream().Close();
+            connectionn.Dispose();
         }
     }
 }

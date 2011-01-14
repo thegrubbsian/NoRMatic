@@ -147,13 +147,12 @@ namespace NoRMatic.Tests {
             patient.Delete();
 
             var fetched = Patient.GetById(patient.Id, includeDeleted: true);
-
             fetched.FirstName = "NEWFIRSTNAME";
             fetched.Save();
 
             var reFetched = Patient.GetById(patient.Id, includeDeleted: true);
 
-            Assert.AreEqual(reFetched.FirstName, patient.FirstName);
+            Assert.AreEqual(patient.FirstName, reFetched.FirstName);
         }
 
         [Test]
@@ -451,6 +450,36 @@ namespace NoRMatic.Tests {
 
             Assert.IsNotNull(fetchedRef);
             Assert.AreEqual(fetchedRef.Name, supplier.Name);
+        }
+
+        [Test]
+        public void GivenManyModelsSavedInSuccession_TheConnectionPool_ShouldHandleAppropriately() {
+
+            Supplier.DeleteAll();
+
+            for (var i = 0; i < 100; i++) {
+                var supplier = new Supplier {Name = "Supplier" + i, Address = "Address" + i};
+                supplier.Save();
+            }
+
+            var suppliers = Supplier.All().ToList();
+            Assert.AreEqual(100, suppliers.Count());
+        }
+
+        [Test]
+        public void GivenManyModelsSavedAndReadInSuccession_TheConnectionPool_ShouldHandleAppropriately() {
+
+            Supplier.DeleteAll();
+            var allFound = true;
+
+            for (var i = 0; i < 100; i++) {
+                var supplier = new Supplier { Name = "Supplier" + i, Address = "Address" + i };
+                supplier.Save();
+                var fetched = Supplier.GetById(supplier.Id);
+                if (fetched == null || fetched.Name != supplier.Name) { allFound = false; }
+            }
+
+            Assert.True(allFound);
         }
     }
 }
