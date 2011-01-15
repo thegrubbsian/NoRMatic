@@ -9,35 +9,36 @@ namespace NoRMatic {
     // Partial class to contain all the database helper methods (GetCollection, AddIndex, etc)
     public abstract partial class NoRMaticModel<T> where T : NoRMaticModel<T> {
 
+        internal static MongoDatabase GetDatabase() {
+            var pool = ConnectionPool<T>.Instance;
+            return new MongoDatabase(pool.DatabaseName, pool.GetConnection());
+        }
+
         /// <summary>
         /// Returns a raw NoRM collection which allows direct access to all of the underlying NoRM methods.
         /// </summary>
         public static IMongoCollection<T> GetMongoCollection() {
 
-            var conString = ModelConfig.ConnectionStringProvider != null ?
-                ModelConfig.ConnectionStringProvider() : NoRMaticConfig.ConnectionString;
+            //var conString = ModelConfig.ConnectionStringProvider != null ?
+            //    ModelConfig.ConnectionStringProvider() : NoRMaticConfig.ConnectionString;
 
-            using (var db = Mongo.Create(conString)) {
-                return db.GetCollection<T>();
-            }
+            //using (var db = GetMongo()) {
+            //    return db.GetCollection<T>();
+            //}
 
-            //var pool = ConnectionPool<T>.Instance;
-            //var database = new MongoDatabase(pool.DatabaseName, pool.GetConnection());
-            //return database.GetCollection<T>();
+            return GetDatabase().GetCollection<T>();
         }
 
         private static IMongoCollection<TX> GetMongoCollection<TX>() where TX : NoRMaticModel<TX> {
 
-            var conString = ModelConfig.ConnectionStringProvider != null ?
-                ModelConfig.ConnectionStringProvider() : NoRMaticConfig.ConnectionString;
+            //var conString = ModelConfig.ConnectionStringProvider != null ?
+            //    ModelConfig.ConnectionStringProvider() : NoRMaticConfig.ConnectionString;
 
-            using (var db = Mongo.Create(conString)) {
-                return db.GetCollection<TX>();
-            }
+            //using (var db = GetMongo()) {
+            //    return db.GetCollection<TX>();
+            //}
 
-            //var pool = ConnectionPool<TX>.Instance;
-            //var database = new MongoDatabase(pool.DatabaseName, pool.GetConnection());
-            //return database.GetCollection<TX>();
+            return GetDatabase().GetCollection<TX>();
         }
 
         /// <summary>

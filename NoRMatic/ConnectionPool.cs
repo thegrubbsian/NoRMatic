@@ -16,12 +16,11 @@ namespace NoRMatic {
             get { return Nested.instance; }
         }
 
-        private const int MaxFreeConnections = 5;
-        private const int MinTimeToLive = 100;
+        private const int MaxFreeConnections = 3;
 
         private readonly NormalConnectionProvider _provider;
         private readonly Stack<IConnection> _freeConnections;
-        private readonly List<KeyValuePair<IConnection, long>> _usedConnections;
+        private readonly List<IConnection> _usedConnections;
 
         private static string ConnectionString {
             get { 
@@ -40,7 +39,7 @@ namespace NoRMatic {
             _provider = new NormalConnectionProvider(builder);
 
             _freeConnections = new Stack<IConnection>();
-            _usedConnections = new List<KeyValuePair<IConnection, long>>();
+            _usedConnections = new List<IConnection>();
 
             _freeConnections.Push(_provider.Open(string.Empty));
         }
@@ -55,15 +54,13 @@ namespace NoRMatic {
             }
 
             var connection = _freeConnections.Pop();
-            _usedConnections.Add(new KeyValuePair<IConnection, long>(connection, DateTime.Now.Ticks));
+            _usedConnections.Add(connection);
             return connection;
         }
 
         private void Prune() {
             for (var i = 0; i < _usedConnections.Count; i++) {
-                var ticksToLive = MinTimeToLive * 10000;
-                var lifetime = DateTime.Now.Ticks - _usedConnections[i].Value;
-                if (_usedConnections[i].Key.GetStream().DataAvailable || lifetime <= ticksToLive) continue;
+                if (_usedConnections[i].GetStream().DataAvailable) continue;
                 ReclaimUsedConnectionToPool(_usedConnections[i]);
             }
             ReduceFreeConnectionsToBaseline();
@@ -76,16 +73,16 @@ namespace NoRMatic {
             }
         }
 
-        private void ReclaimUsedConnectionToPool(KeyValuePair<IConnection, long> connectionItem) {
-            _usedConnections.Remove(connectionItem);
+        private void ReclaimUsedConnectionToPool(IConnection connection) {
+            _usedConnections.Remove(connection);
 
-            if (connectionItem.Key.IsInvalid || !connectionItem.Key.IsConnected) {
-                DestroyConnection(connectionItem.Key);
+            if (connection.IsInvalid || !connection.IsConnected) {
+                DestroyConnection(connection);
                 return;
             }
 
-            ResetStream(connectionItem.Key.GetStream());
-            _freeConnections.Push(connectionItem.Key);
+            ResetStream(connection.GetStream());
+            _freeConnections.Push(connection);
         }
 
         private static void ResetStream(NetworkStream stream) {

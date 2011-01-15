@@ -79,7 +79,9 @@ namespace NoRMatic {
             if (ModelConfig.EnableUserAuditing && GlobalConfig.CurrentUserProvider != null)
                 UpdatedBy = GlobalConfig.CurrentUserProvider();
 
-            GetMongoCollection().Save((T)this);
+            var db = GetDatabase();
+            db.GetCollection<T>().Save((T)this);
+            db.LastError(); // Forces the write to be synchronous
 
             if (ModelConfig.EnableVersioning) SaveVersion();
 
