@@ -79,9 +79,7 @@ namespace NoRMatic {
             if (ModelConfig.EnableUserAuditing && GlobalConfig.CurrentUserProvider != null)
                 UpdatedBy = GlobalConfig.CurrentUserProvider();
 
-            var db = GetDatabase();
-            db.GetCollection<T>().Save((T)this);
-            db.LastError(); // Forces the write to be synchronous
+            SyncSave((T)this);
 
             if (ModelConfig.EnableVersioning) SaveVersion();
 
@@ -145,7 +143,7 @@ namespace NoRMatic {
         private void SoftDelete() {
             IsDeleted = true;
             DateDeleted = DateTime.Now;
-            GetMongoCollection().Save((T)this);
+            SyncSave((T) this);
             WriteToLog(string.Format("SOFT DELETE -- Type: {0}, Id: {1}", typeof(T).Name, Id));
         }
 
@@ -153,7 +151,7 @@ namespace NoRMatic {
             var clone = Clone();
             clone.IsVersion = true;
             clone.VersionOfId = Id;
-            GetMongoCollection().Save(clone);
+            SyncSave(clone);
             WriteToLog(string.Format("VERSIONED -- Type: {0}, Source Id: {1}, Version Id: {2}", typeof(T).Name, Id, clone.Id));
         }
 
@@ -190,6 +188,12 @@ namespace NoRMatic {
         private static void WriteToLog(string message) {
             if (GlobalConfig.LogListener != null)
                 GlobalConfig.LogListener(message);
+        }
+
+        private static void SyncSave(T obj) {
+            var db = GetDatabase();
+            db.GetCollection<T>().Save(obj);
+            db.LastError(); // Forces the write to be synchronous
         }
     }
 }

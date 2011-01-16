@@ -10,34 +10,21 @@ namespace NoRMatic {
     public abstract partial class NoRMaticModel<T> where T : NoRMaticModel<T> {
 
         internal static MongoDatabase GetDatabase() {
-            var pool = new ConnectionPool<T>();
-            return new MongoDatabase(pool.DatabaseName, pool.GetConnection());
+            var pool = ConnectionPool.Instance;
+            var conString = ModelConfig.ConnectionStringProvider != null ? 
+                ModelConfig.ConnectionStringProvider() : NoRMaticConfig.ConnectionString;
+            var connectionInfo = pool.GetConnection(conString);
+            return new MongoDatabase(connectionInfo.DatabaseName, connectionInfo.Connection);
         }
 
         /// <summary>
         /// Returns a raw NoRM collection which allows direct access to all of the underlying NoRM methods.
         /// </summary>
         public static IMongoCollection<T> GetMongoCollection() {
-
-            //var conString = ModelConfig.ConnectionStringProvider != null ?
-            //    ModelConfig.ConnectionStringProvider() : NoRMaticConfig.ConnectionString;
-
-            //using (var db = GetMongo()) {
-            //    return db.GetCollection<T>();
-            //}
-
             return GetDatabase().GetCollection<T>();
         }
 
         private static IMongoCollection<TX> GetMongoCollection<TX>() where TX : NoRMaticModel<TX> {
-
-            //var conString = ModelConfig.ConnectionStringProvider != null ?
-            //    ModelConfig.ConnectionStringProvider() : NoRMaticConfig.ConnectionString;
-
-            //using (var db = GetMongo()) {
-            //    return db.GetCollection<TX>();
-            //}
-
             return GetDatabase().GetCollection<TX>();
         }
 
