@@ -16,7 +16,7 @@ namespace NoRMatic {
             get { return Nested.instance; }
         }
 
-        private const int MaxFreeConnections = 3;
+        private const int MaxFreeConnections = 2;
 
         private readonly NormalConnectionProvider _provider;
         private readonly Stack<IConnection> _freeConnections;
@@ -25,7 +25,8 @@ namespace NoRMatic {
         private static string ConnectionString {
             get { 
                 return NoRMaticModel<T>.ModelConfig.ConnectionStringProvider != null ?
-                    NoRMaticModel<T>.ModelConfig.ConnectionStringProvider() : NoRMaticConfig.ConnectionString;
+                    NoRMaticModel<T>.ModelConfig.ConnectionStringProvider() : 
+                    NoRMaticConfig.ConnectionString;
             }
         }
 

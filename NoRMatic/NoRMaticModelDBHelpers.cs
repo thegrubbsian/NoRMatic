@@ -10,7 +10,7 @@ namespace NoRMatic {
     public abstract partial class NoRMaticModel<T> where T : NoRMaticModel<T> {
 
         internal static MongoDatabase GetDatabase() {
-            var pool = ConnectionPool<T>.Instance;
+            var pool = new ConnectionPool<T>();
             return new MongoDatabase(pool.DatabaseName, pool.GetConnection());
         }
 
