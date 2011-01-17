@@ -7,7 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoRMatic.Tests", "NoRMatic.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{C031FB6E-1CFA-4FD0-A94B-0E8232DB5140}"
 	ProjectSection(SolutionItems) = preProject
-		Lib\Norm.dll = Lib\Norm.dll
 		Lib\nunit.framework.dll = Lib\nunit.framework.dll
 	EndProjectSection
 EndProject
