@@ -1,8 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Norm;
 
 namespace NoRMatic {
+
+    internal class Pipe<T> {
+
+        private readonly List<T> _list = new List<T>();
+
+        public int Count {
+            get { return _list.Count; }
+        }
+
+        public void Give(T item) {
+            _list.Insert(0, item);
+        }
+
+        public T Take() {
+            var item = _list.LastOrDefault();
+            if (_list.Count > 0) _list.RemoveAt(_list.Count - 1);
+            return item;
+        }
+
+        public T[] ToArray() {
+            return _list.ToArray();
+        }
+
+        public void Clear() {
+            _list.Clear();
+        }
+    }
 
     internal class ConnectionInfo : IDisposable {
 
@@ -45,11 +73,12 @@ namespace NoRMatic {
             get { return Nested.instance; }
         }
 
-        private const int MinCycleAge = 100; // Half-second
-        private const int PruningAge = 100000; // One Minute
+        // In miliseconds
+        private const int MinCycleAge = 300;
+        private const int PruningAge = 300000;
 
         private readonly object _lock = new object();
-        private readonly Dictionary<string, Stack<ConnectionInfo>> _freeConnections = new Dictionary<string, Stack<ConnectionInfo>>();
+        private readonly Dictionary<string, Pipe<ConnectionInfo>> _freeConnections = new Dictionary<string, Pipe<ConnectionInfo>>();
         private readonly Dictionary<string, List<ConnectionInfo>> _usedConnections = new Dictionary<string, List<ConnectionInfo>>();
 
         public ConnectionInfo GetConnection(string connectionString) {
@@ -65,11 +94,11 @@ namespace NoRMatic {
                 if (_freeConnections[connectionString].Count == 0) {
                     Free(connectionString);
                     if (_freeConnections[connectionString].Count == 0) {
-                        _freeConnections[connectionString].Push(CreateConnection(connectionString));
+                        _freeConnections[connectionString].Give(CreateConnection(connectionString));
                     }
                 }
 
-                connectionInfo = _freeConnections[connectionString].Pop();
+                connectionInfo = _freeConnections[connectionString].Take();
                 connectionInfo.LastUsedTimestamp = DateTime.Now.Ticks;
                 _usedConnections[connectionString].Add(connectionInfo);
             }
@@ -80,7 +109,7 @@ namespace NoRMatic {
         private void CheckContainersForInitialization(string connectionString) {
 
             if (!_freeConnections.ContainsKey(connectionString))
-                _freeConnections[connectionString] = new Stack<ConnectionInfo>();
+                _freeConnections[connectionString] = new Pipe<ConnectionInfo>();
 
             if (!_usedConnections.ContainsKey(connectionString))
                 _usedConnections[connectionString] = new List<ConnectionInfo>();
@@ -101,7 +130,7 @@ namespace NoRMatic {
                 _usedConnections[connectionString].Remove(connectionInfo);
                 if (connectionInfo.IsAlive()) {
                     connectionInfo.LastUsedTimestamp = DateTime.Now.Ticks;
-                    _freeConnections[connectionString].Push(connectionInfo);
+                    _freeConnections[connectionString].Give(connectionInfo);
                 } else {
                     connectionInfo.Dispose();
                 }
@@ -119,7 +148,7 @@ namespace NoRMatic {
                         connectionInfo.Dispose();
                         continue;
                     }
-                    _freeConnections[connectionString].Push(connectionInfo);
+                    _freeConnections[connectionString].Give(connectionInfo);
                 }
             }
         }
