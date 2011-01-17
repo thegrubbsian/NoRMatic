@@ -6,19 +6,33 @@ using Norm;
 
 namespace NoRMatic {
 
-    internal class ConnectionInfo {
+    internal class ConnectionInfo : IDisposable {
 
         public IConnection Connection { get; private set; }
         public string DatabaseName { get; private set; }
         public string ConnectionString { get; private set; }
         public long CreatedTimestamp { get; private set; }
+        public long LastUsedTimestamp { get; set; }
+        public bool IsDisposed { get; private set; }
 
-        public ConnectionInfo(IConnection connection, string databaseName, 
-            string connectionString, long createdTimestamp) {
+        public ConnectionInfo(IConnection connection, 
+            string databaseName, string connectionString) {
             Connection = connection;
             DatabaseName = databaseName;
             ConnectionString = connectionString;
-            CreatedTimestamp = createdTimestamp;
+            CreatedTimestamp = DateTime.Now.Ticks;
+        }
+
+        public bool IsAlive() {
+            return !Connection.IsInvalid &&
+                !IsDisposed && Connection.IsConnected;
+        }
+
+        public void Dispose() {
+            Connection.GetStream().Close();
+            Connection.GetStream().Dispose();
+            Connection.Dispose();
+            IsDisposed = true;
         }
     }
 
@@ -33,97 +47,83 @@ namespace NoRMatic {
             get { return Nested.instance; }
         }
 
-        private const int MaxFreeConnections = 10;
-        private const int MinTimeToLive = 500;
+        private const int MinCycleAge = 100; // Half-second
+        private const int PruningAge = 100000; // One Minute
 
         private readonly object _lock = new object();
-        private readonly Dictionary<string, Stack<ConnectionInfo>> _freeConnections;
-        private readonly Dictionary<string, List<ConnectionInfo>> _usedConnections;
-
-        public ConnectionPool() {
-            _freeConnections = new Dictionary<string, Stack<ConnectionInfo>>();
-            _usedConnections = new Dictionary<string, List<ConnectionInfo>>();
-        }
+        private readonly Dictionary<string, Stack<ConnectionInfo>> _freeConnections = new Dictionary<string, Stack<ConnectionInfo>>();
+        private readonly Dictionary<string, List<ConnectionInfo>> _usedConnections = new Dictionary<string, List<ConnectionInfo>>();
 
         public ConnectionInfo GetConnection(string connectionString) {
 
-            CheckContainersForInitialization(connectionString);
+            ConnectionInfo connectionInfo;
 
             lock (_lock) {
-                if (_freeConnections[connectionString].Count == 0 ||
-                    _freeConnections[connectionString].Count > MaxFreeConnections) {
-                    Prune(connectionString);
+
+                CheckContainersForInitialization(connectionString);
+
+                Prune();
+
+                if (_freeConnections[connectionString].Count == 0) {
+                    Free(connectionString);
                     if (_freeConnections[connectionString].Count == 0) {
                         _freeConnections[connectionString].Push(CreateConnection(connectionString));
                     }
                 }
-            }
 
-            ConnectionInfo connectionInfo;
-            lock (_lock) {
                 connectionInfo = _freeConnections[connectionString].Pop();
+                connectionInfo.LastUsedTimestamp = DateTime.Now.Ticks;
                 _usedConnections[connectionString].Add(connectionInfo);
             }
+
             return connectionInfo;
         }
 
         private void CheckContainersForInitialization(string connectionString) {
 
-            lock (_lock) {
-                if (!_freeConnections.ContainsKey(connectionString))
-                    _freeConnections[connectionString] = new Stack<ConnectionInfo>();
+            if (!_freeConnections.ContainsKey(connectionString))
+                _freeConnections[connectionString] = new Stack<ConnectionInfo>();
 
-                if (!_usedConnections.ContainsKey(connectionString))
-                    _usedConnections[connectionString] = new List<ConnectionInfo>();
-            }
+            if (!_usedConnections.ContainsKey(connectionString))
+                _usedConnections[connectionString] = new List<ConnectionInfo>();
         }
 
         private static ConnectionInfo CreateConnection(string connectionString) {
             var builder = ConnectionStringBuilder.Create(connectionString);
             var provider = new NormalConnectionProvider(builder);
             return new ConnectionInfo(provider.Open(string.Empty), 
-                builder.Database, connectionString, DateTime.Now.Ticks);
+                builder.Database, connectionString);
         }
 
-        private void Prune(string connectionString) {
-            lock (_lock) {
-                for (var i = 0; i < _usedConnections[connectionString].Count; i++) {
-                    var connectionInfo = _usedConnections[connectionString][i];
-                    var lifetime = DateTime.Now.Ticks - connectionInfo.CreatedTimestamp;
-                    if (connectionInfo.Connection.GetStream().DataAvailable || lifetime <= (MinTimeToLive*10000))
-                        continue;
-                    ReclaimUsedConnectionToPool(connectionString, connectionInfo);
-                }
-                ReduceFreeConnectionsToBaseline(connectionString);
-            }
-        }
-
-        private void ReduceFreeConnectionsToBaseline(string connectionString) {
-            lock (_lock) {
-                while (_freeConnections[connectionString].Count > MaxFreeConnections) {
-                    var connectionInfo = _freeConnections[connectionString].Pop();
-                    DestroyConnection(connectionInfo.Connection);
-                }
-                Monitor.Pulse(_lock);
-            }
-        }
-
-        private void ReclaimUsedConnectionToPool(string connectionString, ConnectionInfo connectionInfo) {
-            lock (_lock) {
+        private void Free(string connectionString) {
+            for (var i = 0; i < _usedConnections[connectionString].Count; i++) {
+                var connectionInfo = _usedConnections[connectionString][i];
+                var cycleAge = DateTime.Now.Ticks - connectionInfo.LastUsedTimestamp;
+                if (cycleAge <= (MinCycleAge * 10000D)) continue;
                 _usedConnections[connectionString].Remove(connectionInfo);
-                if (connectionInfo.Connection.IsInvalid || !connectionInfo.Connection.IsConnected) {
-                    DestroyConnection(connectionInfo.Connection);
-                    return;
+                if (connectionInfo.IsAlive()) {
+                    connectionInfo.LastUsedTimestamp = DateTime.Now.Ticks;
+                    _freeConnections[connectionString].Push(connectionInfo);
+                } else {
+                    connectionInfo.Dispose();
                 }
-                _freeConnections[connectionString].Push(connectionInfo);
-                Monitor.Pulse(_lock);
             }
         }
 
-        private static void DestroyConnection(IConnection connectionn) {
-            connectionn.GetStream().Close();
-            connectionn.GetStream().Dispose();
-            connectionn.Dispose();
+        private void Prune() {
+            var connectionStrings = _freeConnections.Keys;
+            foreach (var connectionString in connectionStrings) {
+                var connectionInfos = _freeConnections[connectionString].ToArray();
+                _freeConnections[connectionString].Clear();
+                foreach (var connectionInfo in connectionInfos) {
+                    var age = DateTime.Now.Ticks - connectionInfo.CreatedTimestamp;
+                    if (!connectionInfo.IsAlive() || age >= (PruningAge * 10000D)) {
+                        connectionInfo.Dispose();
+                        continue;
+                    }
+                    _freeConnections[connectionString].Push(connectionInfo);
+                }
+            }
         }
     }
 }
