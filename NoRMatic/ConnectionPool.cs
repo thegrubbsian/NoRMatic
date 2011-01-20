@@ -5,6 +5,7 @@ using Norm;
 
 namespace NoRMatic {
 
+    // A first-in-last-out container for connections
     internal class Pipe<T> {
 
         private readonly List<T> _list = new List<T>();
@@ -31,6 +32,7 @@ namespace NoRMatic {
             _list.Clear();
         }
     }
+
 
     internal class ConnectionInfo : IDisposable {
 
