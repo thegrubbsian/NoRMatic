@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Threading;
 using Norm;
 using Norm.BSON.DbTypes;
 using NUnit.Framework;
@@ -480,6 +482,31 @@ namespace NoRMatic.Tests {
             }
 
             Assert.True(allFound);
+        }
+
+        [Test]
+        public void GivenANewModel_CallingSave_ShouldSetTheDateCreatedProperty() {
+
+            var patient = new Patient();
+            patient.Save();
+
+            Assert.Greater(patient.DateCreated, default(DateTime));
+        }
+
+        [Test]
+        public void GivenAnExistingModel_CallingSave_ShouldUpdateTheDateModifiedPropertyByNotDateCreated() {
+
+            var patient = new Patient();
+            patient.Save();
+
+            Thread.Sleep(2000);
+
+            patient.Save();
+
+            var fetched = Patient.GetById(patient.Id);
+
+            Assert.AreNotEqual(fetched.DateCreated, fetched.DateUpdated);
+            Assert.Greater(fetched.DateUpdated, fetched.DateCreated);
         }
     }
 }

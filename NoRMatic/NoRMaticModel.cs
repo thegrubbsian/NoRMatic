@@ -28,7 +28,13 @@ namespace NoRMatic {
         public ObjectId Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the last updated date for the model.  Thsi will be auto-assigned when Save() is called
+        /// Gets the created date for the model.  This will be auto-assigned when Save() is called on the model
+        /// for the first time.
+        /// </summary>
+        public DateTime DateCreated { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets the last updated date for the model.  This will be auto-assigned when Save() is called
         /// on the model.  If EnableVersioning is set, this will also indicate the date the version was made for
         /// version documents.
         /// </summary>
@@ -73,6 +79,9 @@ namespace NoRMatic {
                 ModelConfig.BeforeSave)) return (T)this;
 
             if (Validate().Count > 0) return (T)this;
+
+            if (DateCreated == default(DateTime))
+                DateCreated = DateTime.Now;
 
             DateUpdated = DateTime.Now;
 
